@@ -2,36 +2,88 @@ import { useState, useRef, useEffect } from "react";
 
 // ============ THEME ============
 const C = {
-  pitch: "#14301f", pitchDeep: "#0d2316",
-  grass: "#2e7d4f", grassLight: "#3a9663",
-  chalk: "#f5f2e8", chalkDim: "rgba(245,242,232,0.55)",
-  laterite: "#c4502a", gold: "#d9a441", line: "rgba(245,242,232,0.18)",
+  // Base — deep tactical board feel, not just "green pitch"
+  bg: "#080c10",
+  surface: "#0e1419",
+  surface2: "#141c24",
+  border: "rgba(255,255,255,0.08)",
+  borderStrong: "rgba(255,255,255,0.15)",
+
+  // Primary — chalk white
+  chalk: "#f0ece0",
+  chalkDim: "rgba(240,236,224,0.5)",
+  chalkFaint: "rgba(240,236,224,0.2)",
+
+  // Accents
+  gold: "#e8b84b",
+  goldDim: "rgba(232,184,75,0.12)",
+  goldLine: "rgba(232,184,75,0.3)",
+
+  // Status
+  green: "#3d9970",
+  greenDim: "rgba(61,153,112,0.15)",
+  red: "#e74c3c",
+  redDim: "rgba(231,76,60,0.12)",
+
+  // Phase colours
+  possess: "#3d9970",   // in possession
+  defend: "#e74c3c",    // out of possession
+  transit: "#e8b84b",   // transition
+  rondo: "#5b8dee",     // rondos
+  build: "#9b59b6",     // build up
+
+  // Legacy compat
+  pitch: "#080c10",
+  pitchDeep: "#0e1419",
+  grass: "#3d9970",
+  grassLight: "#52b585",
+  laterite: "#e74c3c",
+  line: "rgba(255,255,255,0.08)",
 };
 
 const FontStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Mukta:wght@400;500;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Mukta:wght@400;500;700;800&display=swap');
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; }
-    .display { font-family: 'Anton', sans-serif; letter-spacing: 0.02em; }
-    .body { font-family: 'Mukta', sans-serif; }
+    html, body { margin: 0; background: ${C.bg}; }
+    .display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+    .body { font-family: 'Inter', 'Mukta', sans-serif; }
+    .mono { font-family: 'Space Grotesk', monospace; }
+
     @keyframes chalkIn { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .fade-up { animation: fadeUp 0.35s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { opacity:.3; transform:scale(.85); } 50% { opacity:1; transform:scale(1.15); } }
+
+    .fade-up { animation: fadeUp 0.25s ease both; }
+    .chalk-line { animation: chalkIn 1s ease both; }
+
+    ::-webkit-scrollbar { width: 2px; }
+    ::-webkit-scrollbar-thumb { background: ${C.borderStrong}; border-radius: 2px; }
+
+    button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-visible {
+      outline: 2px solid ${C.gold}; outline-offset: 2px;
+    }
+
+    /* Phase pill variants */
+    .phase-possess { background: rgba(61,153,112,0.15); color: #3d9970; border-color: rgba(61,153,112,0.4); }
+    .phase-defend  { background: rgba(231,76,60,0.12);  color: #e74c3c; border-color: rgba(231,76,60,0.35); }
+    .phase-transit { background: rgba(232,184,75,0.12); color: #e8b84b; border-color: rgba(232,184,75,0.35); }
+    .phase-rondo   { background: rgba(91,141,238,0.12); color: #5b8dee; border-color: rgba(91,141,238,0.35); }
+    .phase-build   { background: rgba(155,89,182,0.12); color: #9b59b6; border-color: rgba(155,89,182,0.35); }
+
     @media (prefers-reduced-motion: reduce) {
       .fade-up { animation: none; }
       .chalk-line { animation: none !important; stroke-dashoffset: 0 !important; }
     }
-    button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid ${C.gold}; outline-offset: 2px; }
   `}</style>
 );
 
 const PitchDivider = () => (
-  <svg viewBox="0 0 320 36" style={{ width: "100%", display: "block", margin: "4px 0" }} aria-hidden="true">
-    <line x1="0" y1="18" x2="128" y2="18" stroke={C.chalkDim} strokeWidth="1.5" className="chalk-line" strokeDasharray="600" style={{ animation: "chalkIn 1.2s ease both" }} />
-    <circle cx="160" cy="18" r="14" fill="none" stroke={C.chalkDim} strokeWidth="1.5" className="chalk-line" strokeDasharray="600" style={{ animation: "chalkIn 1.2s ease both" }} />
-    <circle cx="160" cy="18" r="2" fill={C.chalkDim} />
-    <line x1="192" y1="18" x2="320" y2="18" stroke={C.chalkDim} strokeWidth="1.5" className="chalk-line" strokeDasharray="600" style={{ animation: "chalkIn 1.2s ease both" }} />
+  <svg viewBox="0 0 320 20" style={{ width: "100%", display: "block", margin: "2px 0", opacity: 0.3 }} aria-hidden="true">
+    <line x1="0" y1="10" x2="130" y2="10" stroke={C.chalk} strokeWidth="1" className="chalk-line" strokeDasharray="600" />
+    <circle cx="160" cy="10" r="8" fill="none" stroke={C.chalk} strokeWidth="1" className="chalk-line" strokeDasharray="600" />
+    <circle cx="160" cy="10" r="1.5" fill={C.chalk} />
+    <line x1="190" y1="10" x2="320" y2="10" stroke={C.chalk} strokeWidth="1" className="chalk-line" strokeDasharray="600" />
   </svg>
 );
 
@@ -297,33 +349,64 @@ const GK_STAGES = [
 ];
 
 const Card = ({ children, style }) => (
-  <div className="fade-up" style={{ position: "relative", background: C.pitchDeep, border: `1px solid ${C.line}`, borderRadius: 14, padding: 16, marginBottom: 12, ...style }}>{children}</div>
+  <div className="fade-up" style={{
+    background: C.surface, border: `1px solid ${C.border}`,
+    borderRadius: 12, padding: "14px 16px", marginBottom: 10,
+    ...style
+  }}>{children}</div>
 );
+
 const Tag = ({ children, color = C.gold }) => (
-  <span className="body" style={{ fontSize: 11, fontWeight: 700, color: C.pitchDeep, background: color, borderRadius: 999, padding: "2px 10px", letterSpacing: "0.04em" }}>{children}</span>
+  <span className="body" style={{
+    fontSize: 10, fontWeight: 600, letterSpacing: "0.06em",
+    color: C.bg, background: color,
+    borderRadius: 6, padding: "2px 8px", textTransform: "uppercase"
+  }}>{children}</span>
 );
+
 const Btn = ({ children, onClick, primary, disabled, style }) => (
   <button onClick={onClick} disabled={disabled} className="body" style={{
-    background: primary ? C.laterite : "transparent", color: C.chalk,
-    border: primary ? "none" : `1.5px solid ${C.line}`, borderRadius: 10,
-    padding: "12px 18px", fontSize: 15, fontWeight: 700,
-    cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.5 : 1, width: "100%", ...style,
+    background: primary ? C.gold : "transparent",
+    color: primary ? C.bg : C.chalk,
+    border: primary ? "none" : `1px solid ${C.borderStrong}`,
+    borderRadius: 10, padding: "12px 18px",
+    fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em",
+    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled ? 0.35 : 1,
+    width: "100%", transition: "opacity .15s", ...style,
   }}>{children}</button>
 );
-const Chip = ({ children, onClick, href, color = C.line, textColor = C.chalk }) => href ? (
-  <a href={href} target="_blank" rel="noopener noreferrer" className="body" style={{ border: `1px solid ${color}`, color: textColor, borderRadius: 999, padding: "5px 12px", fontSize: 13, textDecoration: "none", display: "inline-block" }}>{children}</a>
+
+const Chip = ({ children, onClick, href, color = C.borderStrong, textColor = C.chalkDim }) => href ? (
+  <a href={href} target="_blank" rel="noopener noreferrer" className="body" style={{
+    border: `1px solid ${color}`, color: textColor,
+    borderRadius: 8, padding: "4px 12px", fontSize: 12,
+    textDecoration: "none", display: "inline-block", fontWeight: 500,
+  }}>{children}</a>
 ) : (
-  <button onClick={onClick} className="body" style={{ background: "transparent", border: `1px solid ${color}`, color: textColor, borderRadius: 999, padding: "5px 12px", fontSize: 13, cursor: "pointer" }}>{children}</button>
+  <button onClick={onClick} className="body" style={{
+    background: "transparent", border: `1px solid ${color}`,
+    color: textColor, borderRadius: 8, padding: "4px 12px",
+    fontSize: 12, cursor: "pointer", fontWeight: 500,
+  }}>{children}</button>
 );
+
 const Field = ({ label, children }) => (
   <div style={{ marginBottom: 14 }}>
-    <div className="body" style={{ fontSize: 12, fontWeight: 700, color: C.gold, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
+    <div className="body" style={{
+      fontSize: 10, fontWeight: 600, color: C.gold,
+      letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6
+    }}>{label}</div>
     {children}
   </div>
 );
+
 const inputStyle = {
-  width: "100%", background: C.pitch, color: C.chalk, border: `1.5px solid ${C.line}`,
-  borderRadius: 10, padding: "12px", fontSize: 15, fontFamily: "'Mukta', sans-serif",
+  width: "100%", background: C.surface2,
+  color: C.chalk, border: `1px solid ${C.border}`,
+  borderRadius: 10, padding: "11px 14px",
+  fontSize: 14, fontFamily: "'Inter', 'Mukta', sans-serif",
+  outline: "none", transition: "border-color .2s",
 };
 
 // ============ PITCH DIAGRAM ============
@@ -579,9 +662,9 @@ function SessionPlanner({ coach, prefill, clearPrefill }) {
   const reset = () => { setStage("form"); setThinking(""); setPlan(null); setErr(""); setSaved(false); };
 
   return (
-    <div style={{ padding: 20 }}>
-      <div className="display" style={{ fontSize: 26, color: C.chalk }}>सेशन प्लानर</div>
-      <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>उम्र → पड़ाव → competency → सोच → सेशन। हर सेशन पाथवे पर एक कदम।</div>
+    <div style={{ padding: 20, overflowY: "auto", height: "calc(100vh - 130px)" }}>
+      <div className="display" style={{ fontSize: 22, fontWeight: 700, color: C.chalk, letterSpacing: "-0.02em" }}>Session Planner</div>
+      <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 16, marginTop: 2 }}>Age → Stage → Competency → Think → Plan. Every session is one step on the pathway.</div>
       {stage === "form" && (
         <Card>
           <Field label="उम्र / पड़ाव">
@@ -756,9 +839,9 @@ NVFC — Narmada Valley Football Club
   const reset = () => { setReport(null); setCopied(false); setForm({ week_start: mondayOf(), sessions: "", avg_attendance: "", went_well: "", challenge: "", kaizen_moment: "" }); };
 
   return (
-    <div style={{ padding: 20 }}>
-      <div className="display" style={{ fontSize: 26, color: C.chalk }}>साप्ताहिक रिपोर्ट</div>
-      <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>भरो → रिपोर्ट बनाओ → कॉपी करके WhatsApp या डायरी में रखो।</div>
+    <div style={{ padding: 20, overflowY: "auto", height: "calc(100vh - 130px)" }}>
+      <div className="display" style={{ fontSize: 22, fontWeight: 700, color: C.chalk, letterSpacing: "-0.02em" }}>Weekly Report</div>
+      <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 16, marginTop: 2 }}>Fill → Generate → Copy to WhatsApp or diary.</div>
 
       {!report && (
         <Card>
@@ -839,8 +922,8 @@ function Sahayak({ coach }) {
 
   return (
     <div style={{ padding: 20, display: "flex", flexDirection: "column", height: "100%" }}>
-      <div className="display" style={{ fontSize: 26, color: C.chalk }}>कोच सहायक</div>
-      <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 12 }}>मैदान का साथी — हिंदी में, सीधा जवाब</div>
+      <div className="display" style={{ fontSize: 22, fontWeight: 700, color: C.chalk, letterSpacing: "-0.02em" }}>Coach Assistant</div>
+      <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 12, marginTop: 2 }}>मैदान का साथी — Hindi में, सीधा जवाब</div>
       <div style={{ flex: 1, overflowY: "auto", minHeight: 200 }}>
         {msgs.map((m, i) => (
           <div key={i} className="fade-up" style={{ marginBottom: 10 }}>
@@ -891,12 +974,1018 @@ function Sahayak({ coach }) {
   );
 }
 
+// ============ NVFA PRINCIPLES KNOWLEDGE BASE ============
+// Source: Coaching the Bielsa Way + Youth Development Coaching (TheFootballCoach)
+// Organised by Principle → Why It Exists → Drills as Evidence
+
+const NVFA_PRINCIPLES = [
+  {
+    phase: "In Possession",
+    icon: "⚽",
+    color: "#2e7d4f",
+    principles: [
+      {
+        name: "Switch of Play",
+        hindi: "खेल बदलना",
+        why: "When one side is overloaded or under pressure, switching the point of attack forces the opponent to reorganise — creating space on the opposite side. Bielsa uses this constantly to move the opponent's defensive block before penetrating.",
+        game_connection: "Build → Progress → Create",
+        coaching_points: [
+          "Open body position to receive and switch in one action",
+          "Use disguise — don't telegraph the switch",
+          "Timing is critical — switch when opponent commits, not before",
+          "The receiving player must be ready to attack space immediately"
+        ],
+        common_mistakes: [
+          "Switching too slowly — defender recovers before ball arrives",
+          "Telegraphing the pass with eyes and body",
+          "Receiving player stands still instead of moving to create angle"
+        ],
+        questions_for_players: [
+          "When is the right moment to switch — what triggers it?",
+          "What does the player receiving the switch need to do before the ball arrives?",
+          "Why do we switch — what are we trying to create?"
+        ],
+        drills: [
+          {
+            name: "4v4+2 Switching Play Practice",
+            source: "Youth Development Coaching",
+            format: "4v4 in each half + 2 neutral players between halves",
+            must: "Try to switch or change the point of attack",
+            might: "Recognise high-pressure areas in order to play away",
+            could: "Isolate the opponent into wide area to win the ball back",
+            desc: "4v4 occurs in each half. Two neutral players positioned between halves can receive and combine to switch the attack to the opposite half. Different rules: 1) Neutrals cannot play forward 2) Players can drop into each zone creating 2v2 centrally.",
+            individual_objectives: [
+              "Open body position to be able to switch play",
+              "Use of disguise to prevent opponent covering the switch",
+              "Timing is critical — ensure forward passes are played through when possible"
+            ],
+            age: "12-16", players: "10+2", principle_tags: ["Switch of Play", "Width", "Support"]
+          }
+        ]
+      },
+      {
+        name: "Penetration",
+        hindi: "घुसपैठ",
+        why: "The ultimate objective in possession is to penetrate the opponent's defensive structure — to play through or beyond the defensive line. Every other in-possession principle exists to create the conditions for penetration.",
+        game_connection: "Create → Finish",
+        coaching_points: [
+          "Look for penetrating passes first — only recycle if not available",
+          "Third-man runs: player A plays to B, B plays to C who has run beyond",
+          "Timing of run must synchronise with the pass",
+          "Attack the space behind the defensive line, not the defender"
+        ],
+        common_mistakes: [
+          "Running too early — triggering offside or allowing defender to track",
+          "Playing backwards when a forward option exists",
+          "Failing to recognise when the gate is open"
+        ],
+        questions_for_players: [
+          "What is penetration and when is it available?",
+          "What does the third man need to do to get free?",
+          "How does movement off the ball create penetration opportunities?"
+        ],
+        drills: [
+          {
+            name: "2v2+2 Combination Practice",
+            source: "Youth Development Coaching",
+            format: "2v2 in middle zone + end players at each end",
+            must: "Try and play through the opponent",
+            might: "Try to run beyond the opponent once a pass has been played",
+            could: "Look to be narrow and prevent opponent playing through",
+            desc: "2v2 in the middle. Each pair attacks two mini-goals at opposite end. They can play into an end-player between opponents' goal, then make a third-man run into space behind the defensive line to receive and score.",
+            individual_objectives: [
+              "Play through the opponent when you regain the ball",
+              "Focus on technique of playing first time (moving ball)",
+              "Encourage running without the ball — beyond the opponent"
+            ],
+            gps: { meters_per_min: 90, accel_per_min: 5.2, sprint_per_min: 0, work_mins: 4, rest_mins: 1, blocks: 5 },
+            age: "12-16", players: "6", principle_tags: ["Penetration", "Movement", "Third Man"]
+          },
+          {
+            name: "4v4+2 Combination Practice",
+            source: "Youth Development Coaching",
+            format: "4v4 locked into quadrant + 1-2 neutral players",
+            must: "Try and move the ball quickly under pressure from the opponent",
+            might: "Recognise how and when to drop in to create 2v1s",
+            could: "Out-of-possession transition quickly and apply pressure",
+            desc: "4v4 where the team in-possession are locked into a quarter of the zone. Team out-of-possession can move freely to regain the ball. If they win it, they must move quickly to a quadrant. 1-2 neutral players help create overloads.",
+            individual_objectives: [
+              "Recognise when to move the ball and when to protect it",
+              "Open shoulders to keep play in sight",
+              "Recognise transition moments"
+            ],
+            age: "12-16", players: "10+2", principle_tags: ["Penetration", "Support", "Transition to Attack"]
+          }
+        ]
+      },
+      {
+        name: "Support & Overloads",
+        hindi: "साथ और अधिकता",
+        why: "Numerical superiority (more attackers than defenders in a zone) is the foundation of Bielsa's positional play. Creating a +1 overload gives the team in possession a free player — someone who can always receive, turn and progress.",
+        game_connection: "Build → Progress",
+        coaching_points: [
+          "The '+1' player is the key — identify them and use them",
+          "Support angles: never stand in a straight line with the ball carrier",
+          "Create triangles — three options always available",
+          "The free player should always be moving to maintain their advantage"
+        ],
+        common_mistakes: [
+          "Standing in a straight line — easily marked",
+          "Supporting too close — compressing space",
+          "Supporting too far — not accessible under pressure"
+        ],
+        questions_for_players: [
+          "Where is the free player — the +1?",
+          "What angle should you support at to get the ball?",
+          "How do you stay free once you have the advantage?"
+        ],
+        drills: [
+          {
+            name: "6v6+1 Possession Practice",
+            source: "Youth Development Coaching",
+            format: "6v6 with 1 permanent neutral player",
+            must: "Try and Take Advantage of 4v3 Centrally",
+            might: "Try and Receive on Half-Turn",
+            could: "Try and Switch to Stay on Ball",
+            desc: "6v6 possession practice with a neutral player who always plays with the team in possession, creating a permanent overload. Teams must recognise and exploit the numerical advantage.",
+            individual_objectives: [
+              "Identify the overload and exploit it quickly",
+              "Receive on the half-turn to face forward",
+              "Use the neutral to switch and maintain possession"
+            ],
+            gps: { meters_per_min: 75, accel_per_min: 0.2, sprint_per_min: 0, work_mins: 4, rest_mins: 1, blocks: 1 },
+            age: "13-16", players: "13", principle_tags: ["Support", "Width", "Penetration"]
+          }
+        ]
+      },
+      {
+        name: "Positional Play",
+        hindi: "स्थितिगत खेल",
+        why: "Bielsa's positional play is about occupying spaces intelligently so that the team always has passing options and can move the ball in any direction. It is not about formation — it is about creating structure that the opponent cannot defend.",
+        game_connection: "Build → Progress → Create",
+        coaching_points: [
+          "Occupy all five lanes of the pitch — don't cluster",
+          "The player with the ball needs three passing options minimum",
+          "Spacing: players should be approximately 10-15m apart",
+          "Before receiving, scan — know your next action"
+        ],
+        common_mistakes: [
+          "Clustering around the ball — losing width and depth",
+          "Receiving with back to goal when forward facing was available",
+          "Not scanning before receiving — slow decisions"
+        ],
+        questions_for_players: [
+          "What is your position's job in this moment?",
+          "Where is the space — and who should be occupying it?",
+          "Before you receive, what do you already know?"
+        ],
+        drills: [
+          {
+            name: "6v6+6 Positional Practice",
+            source: "Youth Development Coaching",
+            format: "6v6 possession in central zone + 6 fixed wide/end players",
+            must: "Try and Take Advantage of 4v3 Centrally",
+            might: "Try and Receive on Half-Turn",
+            could: "Try and Switch to Stay on Ball",
+            desc: "Positional practice where 6 fixed outside players create a scaffold. The central 6v6 must use outside players to progress and maintain possession while outnumbering opponents centrally.",
+            individual_objectives: [
+              "Understand your role within the positional structure",
+              "Scan before receiving to make faster decisions",
+              "Use outside players to release central pressure"
+            ],
+            age: "13-16", players: "18", principle_tags: ["Positional Play", "Support", "Width"]
+          },
+          {
+            name: "3v3+3 Positional Rondo",
+            source: "Youth Development Coaching",
+            format: "3v3 in central grid + 3 outside neutral players",
+            must: "Play around pressure and look to move the point of control",
+            might: "Play into final third and run beyond when required",
+            could: "Play first time to progress the practice",
+            desc: "3v3 in the middle with 3 neutral outside players. Team in possession uses outside players to maintain possession and progress. Develops understanding of how outside players create options and how to use the third man.",
+            age: "12-16", players: "9", principle_tags: ["Positional Play", "Rondo", "Support"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    phase: "Out of Possession",
+    icon: "🛡️",
+    color: "#c4502a",
+    principles: [
+      {
+        name: "Pressing & Counter-Press",
+        hindi: "दबाव देना",
+        why: "Bielsa's pressing is about winning the ball back immediately after losing it — within 5 seconds. This is counter-pressing: the most dangerous moment to press is when the opponent has just received because they are unorganised. Every player must understand their role in the press.",
+        game_connection: "Press → Delay → Recover",
+        coaching_points: [
+          "Trigger: press immediately when ball is lost — 5 second rule",
+          "Nearest player presses the ball carrier — force one direction",
+          "Second player covers the most dangerous passing lane",
+          "Team must stay compact — cannot leave spaces between lines",
+          "Press with intensity — half-hearted pressing is worse than no pressing"
+        ],
+        common_mistakes: [
+          "Pressing too slowly — opponent reorganises",
+          "Individual pressing — team must press as a unit",
+          "Pressing without covering passing lanes — ball escapes easily",
+          "Dropping too deep after losing the ball instead of counter-pressing"
+        ],
+        questions_for_players: [
+          "What is the trigger for the press?",
+          "What is your job when the nearest player presses?",
+          "How do we press as a team — not as individuals?"
+        ],
+        drills: [
+          {
+            name: "5v5 Counter-Pressing Game",
+            source: "Youth Development Coaching",
+            format: "5v5 in defined zone with transition pressing trigger",
+            must: "Apply pressure to the ball as quickly as possible",
+            might: "Try to prevent the opponent playing forward",
+            could: "Look to switch play to the opposite half on regaining possession",
+            desc: "5v5 game where on losing possession the team immediately counter-presses. First team to regain ball must then build through their structure. Trains the habit of immediate pressure on transition.",
+            individual_objectives: [
+              "Press immediately on losing possession",
+              "Prevent the opponent playing forward",
+              "React to transition quickly — both phases"
+            ],
+            age: "13-16", players: "10", principle_tags: ["Counter-Press", "Transition to Defend", "Compactness"]
+          },
+          {
+            name: "5v2 Possession and Counter-Press",
+            source: "Youth Development Coaching",
+            format: "5v2 rondo with pressing trigger on ball loss",
+            must: "Try and disguise passes",
+            might: "Try to play first time to prevent pressure",
+            could: "Counter-press when reds regain the ball",
+            desc: "5v2 rondo where the two defenders must immediately counter-press after the ball is won. Develops both possession quality under pressure and immediate pressing response.",
+            age: "12-16", players: "7", principle_tags: ["Counter-Press", "Possession", "Rondo"]
+          }
+        ]
+      },
+      {
+        name: "Defending 1v1",
+        hindi: "एक बनाम एक रक्षा",
+        why: "Bielsa's man-to-man system demands that every defender wins their individual duel. There is nowhere to hide — if your player beats you, the press is broken. Defending 1v1 is therefore the foundation of his entire defensive system.",
+        game_connection: "Delay → Recover",
+        coaching_points: [
+          "Get goal-side first — your position matters before the duel starts",
+          "Delay: do not dive in — force the attacker to one side",
+          "Stay on your feet — tackle only when the moment is right",
+          "Force the attacker away from goal — towards the touchline or backward",
+          "Anticipate: read the attacker's body shape before they touch the ball"
+        ],
+        common_mistakes: [
+          "Diving in — committing too early, being beaten easily",
+          "Ball-watching instead of player-watching",
+          "Getting ball-side instead of goal-side",
+          "Not recovering quickly after being beaten"
+        ],
+        questions_for_players: [
+          "What position should you be in before the attacker receives the ball?",
+          "When is the right moment to make the tackle?",
+          "What are you forcing the attacker to do — and why?"
+        ],
+        drills: [
+          {
+            name: "Profiled Turn 1v1 Practice",
+            source: "Coaching the Bielsa Way",
+            format: "1v1 with directional start positions",
+            must: "Win the ball or force backward",
+            might: "Anticipate the attacker's direction from body shape",
+            could: "Force the attacker wide and contain",
+            desc: "Attacker starts with ball and attempts to beat the defender and attack the goal. Defender works on positioning, delaying, forcing one direction and winning the tackle at the right moment. From Bielsa's 1v1 defending chapter.",
+            age: "13+", players: "2", principle_tags: ["1v1 Defending", "Delay", "Discipline"]
+          }
+        ]
+      },
+      {
+        name: "Compactness & Shape",
+        hindi: "संगठन और आकार",
+        why: "When out of possession, the team must remain compact — limiting the space between lines so the opponent cannot play through. Bielsa's pressing only works if the team maintains its shape; if players are spread, gaps appear and the press is defeated.",
+        game_connection: "Delay → Recover",
+        coaching_points: [
+          "Distance between lines: no more than 10-12m when defending deep",
+          "Everyone shifts together — no individual decisions",
+          "Block central lanes first — force play wide",
+          "When opponent switches, the whole team shifts together",
+          "Stay compact until the trigger — then press as a unit"
+        ],
+        common_mistakes: [
+          "Individual players stepping out — breaking the defensive block",
+          "Too much distance between lines — opponent plays through",
+          "Shifting too slowly — leaving gaps when ball switches"
+        ],
+        questions_for_players: [
+          "What is your job when the ball goes to the opposite side?",
+          "How close should the lines be when defending?",
+          "What is the trigger to step out and press?"
+        ],
+        drills: [
+          {
+            name: "Defending Practices: Blocking the Opponent",
+            source: "Coaching the Bielsa Way",
+            format: "Structured defensive shape against attacking patterns",
+            must: "Maintain compact shape and block central passing lanes",
+            might: "Force the opponent wide and prevent penetration",
+            could: "Win the ball and transition to attack quickly",
+            desc: "Defensive shape practice from Bielsa Way. Defenders work on maintaining block, shifting as a unit when ball is switched, and identifying the trigger to step out and press. Develops collective defensive intelligence.",
+            age: "14+", players: "8-11", principle_tags: ["Compactness", "Delay", "Discipline"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    phase: "Transition",
+    icon: "⚡",
+    color: "#d9a441",
+    principles: [
+      {
+        name: "Transition to Attack",
+        hindi: "आक्रमण में बदलाव",
+        why: "The moment of winning the ball is the most dangerous attacking moment — the opponent is disorganised and the space is open. Bielsa trains his teams to transition immediately and play forward within seconds of winning possession.",
+        game_connection: "Press → Create → Finish",
+        coaching_points: [
+          "First pass forward if available — don't recycle after winning the ball",
+          "Runners beyond the ball must go immediately",
+          "The player who wins the ball must make a simple pass — not dribble",
+          "Attack the open space at speed before the opponent recovers"
+        ],
+        common_mistakes: [
+          "Taking too many touches after winning possession",
+          "Playing sideways or backward — losing the transition advantage",
+          "Runners being too slow — opponent recovers before ball arrives"
+        ],
+        questions_for_players: [
+          "What do you do in the first 3 seconds after winning the ball?",
+          "Where is the space — and who should be attacking it?",
+          "Why do we play forward immediately on transition?"
+        ],
+        drills: [
+          {
+            name: "Rondo Breakout Game",
+            source: "Youth Development Coaching",
+            format: "4v1 rondos on both sides + central gate",
+            must: "Play around pressure and look to move the point of control",
+            might: "Play into final third and run beyond when required",
+            could: "Play first time to progress the practice",
+            desc: "4v1 Rondos on both sides of the pitch. First team to steal the ball must immediately transition and attack through the central gate before the opponent reorganises. Trains the habit of instant forward transition.",
+            age: "12-16", players: "10", principle_tags: ["Transition to Attack", "Counter-Press", "Penetration"]
+          }
+        ]
+      },
+      {
+        name: "Transition to Defend",
+        hindi: "रक्षा में बदलाव",
+        why: "When possession is lost, the team must immediately reorganise defensively. Bielsa demands that counter-pressing starts within 5 seconds — but if that fails, the team must recover into defensive shape before the opponent can attack.",
+        game_connection: "Press → Delay → Recover",
+        coaching_points: [
+          "5-second rule: counter-press immediately or recover into shape",
+          "Sprint back — not jog — to get goal-side",
+          "Nearest player delays the attacker — buys time for recovery",
+          "Recover to your defensive position, not just near the ball"
+        ],
+        common_mistakes: [
+          "Jogging back instead of sprinting",
+          "Everyone chasing the ball — leaving defensive positions empty",
+          "Not tracking runners — watching the ball only"
+        ],
+        questions_for_players: [
+          "What is the first thing you do when we lose the ball?",
+          "If counter-press fails, where do you recover to?",
+          "What is your job when the nearest player is pressing?"
+        ],
+        drills: [
+          {
+            name: "5v5 Transition Game",
+            source: "Youth Development Coaching",
+            format: "5v5 with instant transition trigger",
+            must: "React immediately to transition — both attack and defend",
+            might: "Apply pressure within 5 seconds of losing possession",
+            could: "Recover into defensive shape if pressing fails",
+            desc: "5v5 game with clear transition triggers. On losing possession, team immediately counter-presses. If ball is not won in 5 seconds, they recover into defensive shape. Trains the dual nature of transition.",
+            age: "13-16", players: "10", principle_tags: ["Transition to Defend", "Counter-Press", "Compactness"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    phase: "Rondos",
+    icon: "🔄",
+    color: "#1565c0",
+    principles: [
+      {
+        name: "Why Rondos Exist",
+        hindi: "रोंडो क्यों?",
+        why: "Rondos are Bielsa's training foundation. They are not warm-up games — they are the purest training environment for all football principles: possession under pressure, pressing triggers, quick decision-making, playing through, and scanning. Every principle can be trained in a rondo.",
+        game_connection: "All phases",
+        coaching_points: [
+          "The player in the middle is the most important teacher — their pressing teaches the others",
+          "One touch rondos develop speed of thought, not just speed of pass",
+          "The rondo is a microcosm of the game — treat it with the same intensity",
+          "Counting touches aloud builds awareness of own decisions"
+        ],
+        common_mistakes: [
+          "Playing rondo as a warm-up — no intensity, no pressing",
+          "Not pressing hard enough in the middle",
+          "Only playing safe passes — not looking to penetrate",
+          "No scanning before receiving"
+        ],
+        questions_for_players: [
+          "What is the rondo teaching you about the real game?",
+          "What does the player in the middle need to do to win the ball?",
+          "How does your first touch affect your next decision?"
+        ],
+        drills: [
+          {
+            name: "Basic Rondo (4v1 / 5v1 / 6v2)",
+            source: "Coaching the Bielsa Way",
+            format: "Circular possession with defenders in middle",
+            must: "Maintain possession and play quickly under pressure",
+            might: "Use one touch when possible to progress the ball",
+            could: "Force the middle player to commit before playing",
+            desc: "Classic rondo. Outside players maintain possession against middle defender(s). Core training tool from Bielsa's methodology. Develops: scanning, first touch, decision speed, pressing shape.",
+            age: "All", players: "5-8", principle_tags: ["Rondo", "Possession", "Pressing"]
+          },
+          {
+            name: "Progression Rondo",
+            source: "Coaching the Bielsa Way",
+            format: "Rondo with directional objective — must progress through gate",
+            must: "Maintain possession and progress through the target gate",
+            might: "Use the free player to break the press",
+            could: "Switch to the opposite gate when primary gate is closed",
+            desc: "Progression rondo from Bielsa Way. Adds directional objective — team must work through a gate while maintaining possession. Connects rondo possession to real game penetration objective.",
+            age: "12+", players: "7-9", principle_tags: ["Rondo", "Penetration", "Positional Play"]
+          },
+          {
+            name: "Progression Rondo — Full-Back Role",
+            source: "Coaching the Bielsa Way",
+            format: "Rondo with full-back overlap trigger",
+            must: "Recognise when to trigger the full-back overlap",
+            might: "Use full-back to create numerical superiority",
+            could: "Switch play when full-back is covered",
+            desc: "Rondo variation specifically training the full-back's attacking role. When the full-back receives in the rondo, they must trigger an overlap or underlap. Connects rondo to real positional responsibilities.",
+            age: "13+", players: "8-10", principle_tags: ["Rondo", "Width", "Positional Play"]
+          },
+          {
+            name: "Counter Press Rondo",
+            source: "Coaching the Bielsa Way",
+            format: "Rondo with immediate pressing trigger on ball loss",
+            must: "Counter-press immediately when possession is lost",
+            might: "Win the ball back within 5 seconds of losing it",
+            could: "Force the opponent into error through collective pressure",
+            desc: "Rondo where when the middle player wins the ball, the roles immediately reverse and the previous possessors must counter-press. The most intense rondo form — trains both possession and pressing within the same drill.",
+            age: "13+", players: "7-9", principle_tags: ["Counter-Press", "Transition", "Rondo"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    phase: "Build Up Play",
+    icon: "🏗️",
+    color: "#4a148c",
+    principles: [
+      {
+        name: "Building from the Back",
+        hindi: "पीछे से खेल बनाना",
+        why: "Building from the back is about creating numerical superiority in your own half to bypass the opponent's press and arrive in midfield with possession. Bielsa demands his goalkeepers and defenders are comfortable under pressure — they are the first attackers.",
+        game_connection: "Build → Progress",
+        coaching_points: [
+          "GK is the first attacker — must be able to play out under pressure",
+          "Centre-backs split wide to create width in buildup",
+          "One holding midfielder drops to create passing triangle with CBs",
+          "The free player — find them immediately and play to them",
+          "If pressed, go direct — do not force buildup into a press trap"
+        ],
+        common_mistakes: [
+          "Playing backward when forward pass is available",
+          "Not splitting wide enough — giving defenders no angle",
+          "Playing into the press — not recognising the trigger to go direct"
+        ],
+        questions_for_players: [
+          "What is the GK's role in buildup play?",
+          "Where should the centre-backs be when we are building?",
+          "How do we know when to play through the press vs go direct?"
+        ],
+        drills: [
+          {
+            name: "Build-Up Play Practice",
+            source: "Coaching the Bielsa Way",
+            format: "GK + defenders building against pressing forwards",
+            must: "Build through the press and arrive in midfield with possession",
+            might: "Use the GK as an active participant — not just a goalkeeper",
+            could: "Recognise when to go direct rather than build through",
+            desc: "From Bielsa Way build-up chapter. GK and defenders work on breaking opponent's first press line. Structured buildup shapes and triggers. Develops understanding of the GK's role as first outfield player.",
+            age: "14+", players: "8-11", principle_tags: ["Build Up", "GK", "Positional Play"]
+          }
+        ]
+      }
+    ]
+  }
+];
+
+const NVFA_WAY = {
+  attack: ["Build", "Progress", "Create", "Finish"],
+  defend: ["Press", "Delay", "Recover"],
+  transitions: ["Transition to Attack", "Transition to Defend"],
+  philosophy: "Organise knowledge around principles. Drills are evidence and examples of principles — not the other way around.",
+  bielsa_core: [
+    "Work-rate is non-negotiable — physical intensity underpins every principle",
+    "Man-to-man marking demands every player wins their individual duel",
+    "The +1 overload — always create numerical superiority in the zone of the ball",
+    "Play vertically when possible — horizontal possession is preparation, not the goal",
+    "Third-man runs — three-player combinations to penetrate defensive blocks",
+    "Counter-pressing: the 5-second rule — win it back or recover shape"
+  ]
+};
+// ============ PRINCIPLES TAB ============
+function Principles() {
+  const [openPhase, setOpenPhase] = useState("In Possession");
+  const [openPrinciple, setOpenPrinciple] = useState(null);
+  const [openDrill, setOpenDrill] = useState(null);
+  const [showWay, setShowWay] = useState(false);
+
+  const phase = NVFA_PRINCIPLES.find(p => p.phase === openPhase);
+
+  const phaseColorClass = {
+    "In Possession": "phase-possess",
+    "Out of Possession": "phase-defend",
+    "Transition": "phase-transit",
+    "Rondos": "phase-rondo",
+    "Build Up Play": "phase-build",
+  };
+
+  return (
+    <div style={{ padding: "16px 16px 0", overflowY: "auto", height: "calc(100vh - 130px)" }}>
+
+      {/* NVFA WAY CARD */}
+      <div className="fade-up" style={{
+        background: `linear-gradient(135deg, ${C.surface2} 0%, ${C.surface} 100%)`,
+        border: `1px solid ${C.goldLine}`,
+        borderRadius: 14, padding: 16, marginBottom: 16,
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <div className="display" style={{ fontSize: 13, fontWeight: 700, color: C.gold, letterSpacing: "0.1em" }}>
+              THE NVFA WAY
+            </div>
+            <div className="body" style={{ fontSize: 11, color: C.chalkDim, marginTop: 3, lineHeight: 1.5 }}>
+              Principles first. Drills are evidence.
+            </div>
+          </div>
+          <button onClick={() => setShowWay(!showWay)} className="body" style={{
+            background: showWay ? C.goldDim : "transparent",
+            border: `1px solid ${C.goldLine}`, color: C.gold,
+            borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer",
+          }}>{showWay ? "Close" : "View"}</button>
+        </div>
+
+        {/* Attack/Defend flow */}
+        <div style={{ display: "flex", gap: 6, marginTop: 12, alignItems: "center", flexWrap: "wrap" }}>
+          {NVFA_WAY.attack.map((a, i) => (
+            <span key={a} className="body" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ background: C.greenDim, color: C.green, border: `1px solid ${C.green}44`, padding: "3px 9px", borderRadius: 6, fontSize: 10, fontWeight: 700 }}>{a}</span>
+              {i < NVFA_WAY.attack.length - 1 && <span style={{ color: C.chalkFaint, fontSize: 10 }}>→</span>}
+            </span>
+          ))}
+          <span style={{ color: C.chalkFaint, fontSize: 10, margin: "0 2px" }}>·</span>
+          {NVFA_WAY.defend.map((d, i) => (
+            <span key={d} className="body" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ background: C.redDim, color: C.red, border: `1px solid ${C.red}44`, padding: "3px 9px", borderRadius: 6, fontSize: 10, fontWeight: 700 }}>{d}</span>
+              {i < NVFA_WAY.defend.length - 1 && <span style={{ color: C.chalkFaint, fontSize: 10 }}>→</span>}
+            </span>
+          ))}
+        </div>
+
+        {showWay && (
+          <div className="fade-up" style={{ marginTop: 14, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
+            <div className="body" style={{ fontSize: 10, color: C.gold, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
+              Bielsa Core Principles
+            </div>
+            {NVFA_WAY.bielsa_core.map((p, i) => (
+              <div key={i} className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 6, paddingLeft: 10, borderLeft: `2px solid ${C.gold}44`, lineHeight: 1.5 }}>
+                {p}
+              </div>
+            ))}
+            <div className="body" style={{ fontSize: 10, color: C.chalkFaint, marginTop: 10, fontStyle: "italic" }}>
+              Sources: Coaching the Bielsa Way + Youth Development Coaching
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* PHASE SELECTOR */}
+      <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 14, scrollbarWidth: "none" }}>
+        {NVFA_PRINCIPLES.map(p => {
+          const active = openPhase === p.phase;
+          return (
+            <button key={p.phase} onClick={() => { setOpenPhase(p.phase); setOpenPrinciple(null); setOpenDrill(null); }}
+              className={`body ${phaseColorClass[p.phase] || ""}`} style={{
+                flexShrink: 0, padding: "6px 12px", borderRadius: 8,
+                border: "1px solid transparent", cursor: "pointer", fontSize: 11, fontWeight: 600,
+                opacity: active ? 1 : 0.5, transition: "opacity .2s",
+                ...(active ? {} : { background: "transparent", color: C.chalkDim, borderColor: C.border }),
+              }}>
+              {p.icon} {p.phase}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* PRINCIPLES LIST */}
+      {phase && phase.principles.map((prin, pi) => (
+        <div key={pi} style={{ marginBottom: 8 }}>
+          {/* Principle row */}
+          <button onClick={() => setOpenPrinciple(openPrinciple === pi ? null : pi)}
+            className="body fade-up" style={{
+              width: "100%", textAlign: "left",
+              background: openPrinciple === pi ? C.surface2 : C.surface,
+              border: `1px solid ${openPrinciple === pi ? phase.color + "55" : C.border}`,
+              borderRadius: openPrinciple === pi ? "12px 12px 0 0" : 12,
+              padding: "13px 16px", cursor: "pointer", transition: "all .2s",
+            }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                  <div className="display" style={{ fontSize: 15, fontWeight: 700, color: C.chalk }}>{prin.name}</div>
+                  <span className="body" style={{ fontSize: 10, color: C.chalkFaint }}>/ {prin.hindi}</span>
+                </div>
+                <div className="body" style={{ fontSize: 10, color: C.chalkDim, letterSpacing: "0.04em" }}>
+                  {prin.game_connection} · {prin.drills.length} drill{prin.drills.length !== 1 ? "s" : ""}
+                </div>
+              </div>
+              <div style={{
+                width: 24, height: 24, borderRadius: 6,
+                background: openPrinciple === pi ? phase.color + "22" : C.surface2,
+                border: `1px solid ${openPrinciple === pi ? phase.color + "55" : C.border}`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: openPrinciple === pi ? phase.color : C.chalkDim, fontSize: 14, flexShrink: 0,
+              }}>
+                {openPrinciple === pi ? "−" : "+"}
+              </div>
+            </div>
+          </button>
+
+          {openPrinciple === pi && (
+            <div className="fade-up" style={{
+              background: C.surface2, border: `1px solid ${phase.color + "33"}`,
+              borderTop: "none", borderRadius: "0 0 12px 12px", padding: "0 14px 14px",
+            }}>
+
+              {/* WHY */}
+              <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14, marginBottom: 12 }}>
+                <div className="body" style={{ fontSize: 9, fontWeight: 700, color: phase.color, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6 }}>
+                  Why This Principle Exists
+                </div>
+                <div className="body" style={{ fontSize: 13, color: C.chalk, lineHeight: 1.7 }}>{prin.why}</div>
+              </div>
+
+              {/* Coaching Points */}
+              <div style={{ background: C.surface, borderRadius: 10, padding: 12, marginBottom: 8 }}>
+                <div className="body" style={{ fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>
+                  🗣 Coaching Points
+                </div>
+                {prin.coaching_points.map((cp, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                    <span style={{ color: phase.color, fontSize: 12, flexShrink: 0, marginTop: 1 }}>→</span>
+                    <span className="body" style={{ fontSize: 12, color: C.chalk, lineHeight: 1.55 }}>{cp}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mistakes + Questions in 2-col */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+                <div style={{ background: C.surface, borderRadius: 10, padding: 10 }}>
+                  <div className="body" style={{ fontSize: 9, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>⚠ Mistakes</div>
+                  {prin.common_mistakes.map((m, i) => (
+                    <div key={i} className="body" style={{ fontSize: 11, color: C.chalkDim, marginBottom: 4, lineHeight: 1.4 }}>• {m}</div>
+                  ))}
+                </div>
+                <div style={{ background: C.surface, borderRadius: 10, padding: 10 }}>
+                  <div className="body" style={{ fontSize: 9, fontWeight: 700, color: C.green, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>❓ Questions</div>
+                  {prin.questions_for_players.map((q, i) => (
+                    <div key={i} className="body" style={{ fontSize: 11, color: C.chalkDim, marginBottom: 4, fontStyle: "italic", lineHeight: 1.4 }}>"{q}"</div>
+                  ))}
+                </div>
+              </div>
+
+              {/* DRILLS HEADER */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <div style={{ flex: 1, height: 1, background: C.border }} />
+                <div className="body" style={{ fontSize: 9, color: C.chalkFaint, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", whiteSpace: "nowrap" }}>
+                  Drills as Evidence
+                </div>
+                <div style={{ flex: 1, height: 1, background: C.border }} />
+              </div>
+
+              {prin.drills.map((drill, di) => (
+                <div key={di} style={{ marginBottom: 6 }}>
+                  <button onClick={() => setOpenDrill(openDrill === `${pi}-${di}` ? null : `${pi}-${di}`)}
+                    className="body" style={{
+                      width: "100%", textAlign: "left",
+                      background: openDrill === `${pi}-${di}` ? C.surface : C.bg,
+                      border: `1px solid ${openDrill === `${pi}-${di}` ? C.goldLine : C.border}`,
+                      borderRadius: openDrill === `${pi}-${di}` ? "8px 8px 0 0" : 8,
+                      padding: "10px 12px", cursor: "pointer",
+                    }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div className="body" style={{ fontSize: 13, fontWeight: 600, color: C.chalk }}>{drill.name}</div>
+                        <div className="body" style={{ fontSize: 10, color: C.chalkDim, marginTop: 2 }}>
+                          {drill.format} · Age {drill.age} · {drill.source}
+                        </div>
+                      </div>
+                      <span style={{ color: C.gold, fontSize: 12, flexShrink: 0, marginLeft: 8 }}>
+                        {openDrill === `${pi}-${di}` ? "−" : "+"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {openDrill === `${pi}-${di}` && (
+                    <div className="fade-up" style={{
+                      background: C.bg, border: `1px solid ${C.goldLine}`,
+                      borderTop: "none", borderRadius: "0 0 8px 8px", padding: 12,
+                    }}>
+                      {/* Must Might Could */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 10 }}>
+                        {drill.must && (
+                          <div className="body" style={{ fontSize: 11, display: "flex", gap: 6 }}>
+                            <span style={{ color: C.red, fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", flexShrink: 0, marginTop: 1 }}>Must</span>
+                            <span style={{ color: C.chalk }}>{drill.must}</span>
+                          </div>
+                        )}
+                        {drill.might && (
+                          <div className="body" style={{ fontSize: 11, display: "flex", gap: 6 }}>
+                            <span style={{ color: C.gold, fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", flexShrink: 0, marginTop: 1 }}>Might</span>
+                            <span style={{ color: C.chalk }}>{drill.might}</span>
+                          </div>
+                        )}
+                        {drill.could && (
+                          <div className="body" style={{ fontSize: 11, display: "flex", gap: 6 }}>
+                            <span style={{ color: C.green, fontWeight: 700, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", flexShrink: 0, marginTop: 1 }}>Could</span>
+                            <span style={{ color: C.chalk }}>{drill.could}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="body" style={{ fontSize: 12, color: C.chalkDim, lineHeight: 1.65, marginBottom: 10 }}>{drill.desc}</div>
+
+                      {drill.individual_objectives && (
+                        <div style={{ marginBottom: 10 }}>
+                          <div className="body" style={{ fontSize: 9, color: C.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>Individual Objectives</div>
+                          {drill.individual_objectives.map((obj, oi) => (
+                            <div key={oi} className="body" style={{ fontSize: 11, color: C.chalk, marginBottom: 3 }}>• {obj}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {drill.gps && (
+                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 10 }}>
+                          {Object.entries(drill.gps).map(([k, v]) => (
+                            <span key={k} className="body" style={{
+                              background: C.surface2, color: C.chalkDim,
+                              padding: "2px 7px", borderRadius: 5, fontSize: 9, fontWeight: 600,
+                              border: `1px solid ${C.border}`, textTransform: "uppercase", letterSpacing: "0.06em"
+                            }}>
+                              {k.replace(/_/g, ' ')}: {v}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+                        {drill.principle_tags.map(tag => (
+                          <span key={tag} className="body" style={{
+                            background: phase.color + "22", color: phase.color,
+                            border: `1px solid ${phase.color}44`,
+                            padding: "2px 8px", borderRadius: 5, fontSize: 9, fontWeight: 700, letterSpacing: "0.04em"
+                          }}>{tag}</span>
+                        ))}
+                        <Chip href={ytLink(drill.name + " football drill")} textColor={C.chalkDim} color={C.border}>▶ Video</Chip>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+
+      <div className="body" style={{ fontSize: 10, color: C.chalkFaint, textAlign: "center", padding: "16px 0", fontStyle: "italic" }}>
+        2 books loaded · 24 more to add · knowledge grows with each book
+      </div>
+    </div>
+  );
+}
+  const [openPhase, setOpenPhase] = useState("In Possession");
+  const [openPrinciple, setOpenPrinciple] = useState(null);
+  const [openDrill, setOpenDrill] = useState(null);
+  const [showWay, setShowWay] = useState(false);
+
+  const phase = NVFA_PRINCIPLES.find(p => p.phase === openPhase);
+
+  return (
+    <div style={{ padding: 20 }}>
+      {/* NVFA WAY header */}
+      <div className="fade-up" style={{ background: C.pitchDeep, border: `1px solid ${C.gold}`, borderRadius: 14, padding: 14, marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div className="display" style={{ fontSize: 20, color: C.gold }}>THE NVFA WAY</div>
+            <div className="body" style={{ fontSize: 11, color: C.chalkDim, marginTop: 2, fontStyle: "italic" }}>
+              Organise around principles. Drills are evidence.
+            </div>
+          </div>
+          <Chip onClick={() => setShowWay(!showWay)} color={C.gold} textColor={C.gold}>
+            {showWay ? "बंद करें" : "देखें"}
+          </Chip>
+        </div>
+        {showWay && (
+          <div className="fade-up" style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+              {NVFA_WAY.attack.map(a => <span key={a} className="body" style={{ background: "#2e7d4f", color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>{a}</span>)}
+              {NVFA_WAY.defend.map(d => <span key={d} className="body" style={{ background: C.laterite, color: "#fff", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>{d}</span>)}
+              {NVFA_WAY.transitions.map(t => <span key={t} className="body" style={{ background: C.gold, color: "#1a0a00", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>{t}</span>)}
+            </div>
+            <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 8 }}>Bielsa Core Principles:</div>
+            {NVFA_WAY.bielsa_core.map((p, i) => (
+              <div key={i} className="body" style={{ fontSize: 12, color: C.chalk, marginBottom: 4 }}>→ {p}</div>
+            ))}
+            <div className="body" style={{ fontSize: 11, color: C.chalkDim, marginTop: 8, fontStyle: "italic" }}>
+              Sources: Coaching the Bielsa Way + Youth Development Coaching (TheFootballCoach)
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Phase selector */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+        {NVFA_PRINCIPLES.map(p => (
+          <button key={p.phase} onClick={() => { setOpenPhase(p.phase); setOpenPrinciple(null); setOpenDrill(null); }}
+            className="body" style={{
+              padding: "6px 12px", borderRadius: 20, border: `1.5px solid ${openPhase === p.phase ? p.color : C.line}`,
+              background: openPhase === p.phase ? p.color + "33" : "transparent",
+              color: openPhase === p.phase ? p.color : C.chalkDim, cursor: "pointer", fontSize: 12, fontWeight: 600
+            }}>
+            {p.icon} {p.phase}
+          </button>
+        ))}
+      </div>
+
+      {/* Principles in selected phase */}
+      {phase && phase.principles.map((prin, pi) => (
+        <div key={pi} style={{ marginBottom: 10 }}>
+          {/* Principle header */}
+          <button onClick={() => setOpenPrinciple(openPrinciple === pi ? null : pi)}
+            className="body fade-up" style={{
+              width: "100%", textAlign: "left", background: C.pitchDeep,
+              border: `1.5px solid ${openPrinciple === pi ? phase.color : C.line}`,
+              borderRadius: 12, padding: "14px 16px", cursor: "pointer",
+            }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div className="display" style={{ fontSize: 18, color: C.chalk }}>{prin.name}</div>
+                <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginTop: 2 }}>
+                  {prin.hindi} • {prin.game_connection}
+                </div>
+              </div>
+              <span style={{ color: phase.color, fontSize: 18 }}>{openPrinciple === pi ? "−" : "+"}</span>
+            </div>
+          </button>
+
+          {openPrinciple === pi && (
+            <div className="fade-up" style={{ padding: "10px 4px 0" }}>
+              {/* WHY section */}
+              <Card style={{ borderColor: phase.color + "66" }}>
+                <div className="body" style={{ fontSize: 11, fontWeight: 700, color: phase.color, textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 6 }}>
+                  WHY THIS PRINCIPLE EXISTS
+                </div>
+                <div className="body" style={{ fontSize: 14, color: C.chalk, lineHeight: 1.7 }}>{prin.why}</div>
+              </Card>
+
+              {/* Coaching points */}
+              <Card>
+                <div className="body" style={{ fontSize: 11, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>
+                  🗣 Coaching Points
+                </div>
+                {prin.coaching_points.map((cp, i) => (
+                  <div key={i} className="body" style={{ fontSize: 13, color: C.chalk, marginBottom: 5, display: "flex", gap: 8 }}>
+                    <span style={{ color: phase.color, flexShrink: 0 }}>→</span>{cp}
+                  </div>
+                ))}
+              </Card>
+
+              {/* Common mistakes */}
+              <Card>
+                <div className="body" style={{ fontSize: 11, fontWeight: 700, color: C.laterite, textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>
+                  ⚠️ Common Mistakes
+                </div>
+                {prin.common_mistakes.map((m, i) => (
+                  <div key={i} className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 5, display: "flex", gap: 8 }}>
+                    <span style={{ color: C.laterite, flexShrink: 0 }}>✗</span>{m}
+                  </div>
+                ))}
+              </Card>
+
+              {/* Questions for players */}
+              <Card>
+                <div className="body" style={{ fontSize: 11, fontWeight: 700, color: C.grassLight, textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>
+                  ❓ Questions to Ask Players
+                </div>
+                {prin.questions_for_players.map((q, i) => (
+                  <div key={i} className="body" style={{ fontSize: 13, color: C.chalk, marginBottom: 5, fontStyle: "italic" }}>"{q}"</div>
+                ))}
+              </Card>
+
+              {/* DRILLS as evidence */}
+              <div className="body" style={{ fontSize: 11, fontWeight: 700, color: C.chalkDim, textTransform: "uppercase", letterSpacing: "1px", margin: "12px 0 8px" }}>
+                📋 DRILLS AS EVIDENCE OF THIS PRINCIPLE
+              </div>
+              {prin.drills.map((drill, di) => (
+                <div key={di} style={{ marginBottom: 8 }}>
+                  <button onClick={() => setOpenDrill(openDrill === `${pi}-${di}` ? null : `${pi}-${di}`)}
+                    className="body" style={{
+                      width: "100%", textAlign: "left", background: C.pitch,
+                      border: `1px solid ${openDrill === `${pi}-${di}` ? C.gold : C.border}`,
+                      borderRadius: 10, padding: "10px 14px", cursor: "pointer",
+                    }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div className="body" style={{ fontSize: 14, fontWeight: 700, color: C.chalk }}>{drill.name}</div>
+                        <div className="body" style={{ fontSize: 11, color: C.chalkDim, marginTop: 2 }}>
+                          {drill.format} • Age: {drill.age} • Source: {drill.source}
+                        </div>
+                      </div>
+                      <span style={{ color: C.gold, fontSize: 14 }}>{openDrill === `${pi}-${di}` ? "−" : "+"}</span>
+                    </div>
+                  </button>
+
+                  {openDrill === `${pi}-${di}` && (
+                    <div className="fade-up" style={{ background: C.pitchDeep, border: `1px solid ${C.gold}`, borderRadius: "0 0 10px 10px", padding: "12px 14px", marginTop: -2 }}>
+                      {/* Must Might Could */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
+                        {drill.must && <div className="body" style={{ fontSize: 12 }}><span style={{ color: C.laterite, fontWeight: 700 }}>MUST:</span> <span style={{ color: C.chalk }}>{drill.must}</span></div>}
+                        {drill.might && <div className="body" style={{ fontSize: 12 }}><span style={{ color: C.gold, fontWeight: 700 }}>MIGHT:</span> <span style={{ color: C.chalk }}>{drill.might}</span></div>}
+                        {drill.could && <div className="body" style={{ fontSize: 12 }}><span style={{ color: C.grassLight, fontWeight: 700 }}>COULD:</span> <span style={{ color: C.chalk }}>{drill.could}</span></div>}
+                      </div>
+                      {/* Description */}
+                      <div className="body" style={{ fontSize: 13, color: C.chalkDim, lineHeight: 1.6, marginBottom: 10 }}>{drill.desc}</div>
+                      {/* Individual objectives */}
+                      {drill.individual_objectives && (
+                        <div>
+                          <div className="body" style={{ fontSize: 11, color: C.gold, fontWeight: 700, marginBottom: 4 }}>Individual Objectives:</div>
+                          {drill.individual_objectives.map((obj, oi) => (
+                            <div key={oi} className="body" style={{ fontSize: 12, color: C.chalk, marginBottom: 3 }}>• {obj}</div>
+                          ))}
+                        </div>
+                      )}
+                      {/* GPS data if available */}
+                      {drill.gps && (
+                        <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {Object.entries(drill.gps).map(([k, v]) => (
+                            <span key={k} className="body" style={{ background: C.border, color: C.chalkDim, padding: "2px 8px", borderRadius: 4, fontSize: 10 }}>
+                              {k.replace(/_/g, ' ')}: {v}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Principle tags */}
+                      <div style={{ marginTop: 8, display: "flex", gap: 4, flexWrap: "wrap" }}>
+                        {drill.principle_tags.map(tag => (
+                          <span key={tag} className="body" style={{ background: phase.color + "33", color: phase.color, padding: "2px 8px", borderRadius: 10, fontSize: 10, fontWeight: 700 }}>{tag}</span>
+                        ))}
+                      </div>
+                      {/* YouTube search */}
+                      <div style={{ marginTop: 10 }}>
+                        <Chip href={ytLink(drill.name + " football drill youth")} textColor={C.chalkDim}>▶ Find video</Chip>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+
+      <div className="body" style={{ fontSize: 11, color: C.chalkDim, textAlign: "center", marginTop: 12, fontStyle: "italic" }}>
+        2 books loaded • 24 more to add • knowledge grows with each book
+      </div>
+    </div>
+  );
+}
+
 // ============ LIBRARY (Drills + GK + Videos) ============
 function Library() {
   const [sub, setSub] = useState("drills");
   const [diagrams, makeDiagram] = useDiagrams();
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 20, overflowY: "auto", height: "calc(100vh - 130px)" }}>
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         <Chip onClick={() => setSub("drills")} color={sub === "drills" ? C.laterite : C.line} textColor={sub === "drills" ? C.laterite : C.chalkDim}>⚽ ड्रिल</Chip>
         <Chip onClick={() => setSub("gk")} color={sub === "gk" ? C.laterite : C.line} textColor={sub === "gk" ? C.laterite : C.chalkDim}>🧤 गोलची</Chip>
@@ -905,8 +1994,8 @@ function Library() {
 
       {sub === "drills" && (
         <>
-          <div className="display" style={{ fontSize: 26, color: C.chalk }}>ड्रिल लाइब्रेरी</div>
-          <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>कम सामान — पूरा खेल। हर ड्रिल के साथ उसका कैज़ेन।</div>
+          <div className="display" style={{ fontSize: 22, fontWeight: 700, color: C.chalk, letterSpacing: "-0.02em" }}>Drill Library</div>
+          <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 16, marginTop: 2 }}>Minimal equipment. Maximum game. Every drill with its kaizen.</div>
           {DRILLS.map((d, i) => (
             <Card key={i}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -930,8 +2019,8 @@ function Library() {
 
       {sub === "gk" && (
         <>
-          <div className="display" style={{ fontSize: 26, color: C.chalk }}>गोलची 🧤</div>
-          <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 8 }}>कोएर्वर pyramid — goalkeeping पर।</div>
+          <div className="display" style={{ fontSize: 22, fontWeight: 700, color: C.chalk, letterSpacing: "-0.02em" }}>Goalkeeper 🧤</div>
+          <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 8, marginTop: 2 }}>Coerver pyramid — applied to goalkeeping.</div>
           {GK_STAGES.map((s, i) => (
             <Card key={i}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -955,8 +2044,8 @@ function Library() {
 
       {sub === "videos" && (
         <>
-          <div className="display" style={{ fontSize: 26, color: C.chalk }}>वीडियो लाइब्रेरी ▶</div>
-          <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>NVFC के priority channels — सबसे पहले यहाँ देखो।</div>
+          <div className="display" style={{ fontSize: 22, fontWeight: 700, color: C.chalk, letterSpacing: "-0.02em" }}>Video Library ▶</div>
+          <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 16, marginTop: 2 }}>Priority channels — check here first.</div>
           {VIDEO_LIBRARY.map((ch, ci) => (
             <Card key={ci} style={{ borderColor: C.gold }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -995,9 +2084,9 @@ function Pathway({ onMakeSession }) {
   const [openStage, setOpenStage] = useState("s2");
   const [diagrams, makeDiagram] = useDiagrams();
   return (
-    <div style={{ padding: 20 }}>
-      <div className="display" style={{ fontSize: 26, color: C.chalk }}>खिलाड़ी पाथवे</div>
-      <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>6 साल से 18 तक — एक सीढ़ी। हर सेशन इस पर एक कदम।</div>
+    <div style={{ padding: 20, overflowY: "auto", height: "calc(100vh - 130px)" }}>
+      <div className="display" style={{ fontSize: 22, fontWeight: 700, color: C.chalk, letterSpacing: "-0.02em" }}>Player Pathway</div>
+      <div className="body" style={{ fontSize: 12, color: C.chalkDim, marginBottom: 16, marginTop: 2 }}>6 to 18 — one ladder. Every session moves one step forward.</div>
       {PATHWAY.map((s) => (
         <div key={s.id} style={{ marginBottom: 10 }}>
           <button onClick={() => setOpenStage(openStage === s.id ? null : s.id)} className="body fade-up" style={{
@@ -1041,52 +2130,109 @@ function Pathway({ onMakeSession }) {
 // ============ APP ============
 export default function App() {
   const [coach] = useState({ name: "NVFC Coach" });
-  const [tab, setTab] = useState("pathway");
+  const [tab, setTab] = useState("principles");
   const [prefill, setPrefill] = useState(null);
   const makeSession = (stageId, comp) => { setPrefill({ stageId, comp }); setTab("session"); };
+
   const tabs = [
-    { id: "pathway", hi: "पाथवे", icon: "🪜" },
-    { id: "session", hi: "सेशन", icon: "📋" },
-    { id: "sahayak", hi: "सहायक", icon: "🤝" },
-    { id: "library", hi: "लाइब्रेरी", icon: "⚽" },
-    { id: "reports", hi: "रिपोर्ट", icon: "📝" },
-    { id: "plans", hi: "प्लान", icon: "📚" },
+    { id: "principles", hi: "सिद्धांत", icon: "🧠" },
+    { id: "session",    hi: "सेशन",    icon: "📋" },
+    { id: "pathway",   hi: "पाथवे",   icon: "🪜" },
+    { id: "sahayak",   hi: "सहायक",   icon: "🤝" },
+    { id: "library",   hi: "लाइब्रेरी", icon: "⚽" },
+    { id: "reports",   hi: "रिपोर्ट",  icon: "📝" },
   ];
+
   return (
-    <div className="body" style={{ minHeight: "100vh", background: C.pitch, display: "flex", justifyContent: "center" }}>
+    <div className="body" style={{ minHeight: "100vh", background: C.bg, display: "flex", justifyContent: "center" }}>
       <FontStyles />
-      <div style={{ width: "100%", maxWidth: 440, display: "flex", flexDirection: "column", minHeight: "100vh", position: "relative" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px 0" }}>
-          <span className="display" style={{ color: C.chalk, fontSize: 20 }}>NVFC</span>
+      <div style={{ width: "100%", maxWidth: 440, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+
+        {/* ── HEADER ── */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 18px 12px",
+          background: C.surface,
+          borderBottom: `1px solid ${C.border}`,
+          position: "sticky", top: 0, zIndex: 50,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* Tactical board icon */}
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <rect width="28" height="28" rx="7" fill={C.gold} fillOpacity=".12" />
+              <rect x="4" y="4" width="20" height="20" rx="3" stroke={C.gold} strokeWidth="1.2" fill="none" />
+              <circle cx="14" cy="14" r="4" stroke={C.gold} strokeWidth="1" fill="none" />
+              <line x1="4" y1="14" x2="10" y2="14" stroke={C.gold} strokeWidth="1" />
+              <line x1="18" y1="14" x2="24" y2="14" stroke={C.gold} strokeWidth="1" />
+            </svg>
+            <div>
+              <div className="display" style={{ fontSize: 16, fontWeight: 700, color: C.chalk, letterSpacing: "-0.02em", lineHeight: 1 }}>
+                NVFA
+              </div>
+              <div className="body" style={{ fontSize: 9, color: C.chalkDim, letterSpacing: "0.12em", textTransform: "uppercase", marginTop: 1 }}>
+                Narmada Valley FA
+              </div>
+            </div>
+          </div>
+
+          {/* Active tab label */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Tag color={C.grass}>NVFC Coach</Tag>
+            <div className="body" style={{
+              fontSize: 11, color: C.gold, fontWeight: 600,
+              background: C.goldDim, border: `1px solid ${C.goldLine}`,
+              padding: "4px 10px", borderRadius: 6, letterSpacing: "0.04em"
+            }}>
+              {tabs.find(t => t.id === tab)?.hi || ""}
+            </div>
           </div>
         </div>
-        <div style={{ flex: 1, paddingBottom: 84 }}>
-          {tab === "pathway" && <Pathway onMakeSession={makeSession} />}
-          {tab === "session" && <SessionPlanner coach={coach} prefill={prefill} clearPrefill={() => setPrefill(null)} />}
-          {tab === "sahayak" && <div style={{ height: "calc(100vh - 150px)" }}><Sahayak coach={coach} /></div>}
-          {tab === "library" && <Library />}
-          {tab === "reports" && <Reports coach={coach} />}
-          {tab === "plans" && <MyPlans />}
+
+        {/* ── CONTENT ── */}
+        <div style={{ flex: 1, paddingBottom: 72, overflow: "hidden" }}>
+          {tab === "principles" && <Principles />}
+          {tab === "session"    && <SessionPlanner coach={coach} prefill={prefill} clearPrefill={() => setPrefill(null)} />}
+          {tab === "pathway"   && <Pathway onMakeSession={makeSession} />}
+          {tab === "sahayak"   && <div style={{ height: "calc(100vh - 130px)" }}><Sahayak coach={coach} /></div>}
+          {tab === "library"   && <Library />}
+          {tab === "reports"   && <Reports coach={coach} />}
         </div>
+
+        {/* ── BOTTOM NAV ── */}
         <div style={{
           position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
-          width: "100%", maxWidth: 440, display: "flex",
-          background: C.pitchDeep, borderTop: `1.5px solid ${C.line}`,
+          width: "100%", maxWidth: 440,
+          background: C.surface,
+          borderTop: `1px solid ${C.border}`,
+          display: "flex",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}>
-          {tabs.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} className="body" style={{
-              flex: 1, background: "none", border: "none", padding: "10px 0 14px",
-              cursor: "pointer", color: tab === t.id ? C.gold : C.chalkDim,
-              borderTop: tab === t.id ? `3px solid ${C.laterite}` : "3px solid transparent",
-              fontSize: 12, fontWeight: 700,
-            }}>
-              <div style={{ fontSize: 17 }}>{t.icon}</div>
-              {t.hi}
-            </button>
-          ))}
+          {tabs.map((t) => {
+            const active = tab === t.id;
+            return (
+              <button key={t.id} onClick={() => setTab(t.id)} className="body" style={{
+                flex: 1, background: "none", border: "none",
+                padding: "9px 0 11px",
+                cursor: "pointer",
+                color: active ? C.gold : C.chalkDim,
+                position: "relative",
+                transition: "color .15s",
+              }}>
+                {/* Active indicator line */}
+                {active && (
+                  <div style={{
+                    position: "absolute", top: 0, left: "20%", right: "20%",
+                    height: 2, background: C.gold, borderRadius: "0 0 2px 2px",
+                  }} />
+                )}
+                <div style={{ fontSize: 16, lineHeight: 1 }}>{t.icon}</div>
+                <div style={{ fontSize: 9, fontWeight: active ? 700 : 500, marginTop: 3, letterSpacing: "0.04em" }}>
+                  {t.hi}
+                </div>
+              </button>
+            );
+          })}
         </div>
+
       </div>
     </div>
   );
