@@ -219,21 +219,18 @@ const PATHWAY = [
 
 // ============ PRIORITY VIDEO MATCHER ============
 function getPriorityVideos(drillName, ytQuery) {
-  const name = (drillName + " " + ytQuery).toLowerCase();
-  const links = [];
-  // Passing → Panda Bros first
-  if (name.match(/pass|rondo|gate/)) {
-    links.push({ t: "▶ Panda Bros — Passing", u: "https://youtu.be/3Lwku21Seb8?si=zPiVoTFZyv-X2Muo" });
+  const name = (drillName + " " + (ytQuery||"")).toLowerCase();
+  const priority = [];
+  if (name.match(/pass|rondo|gate|combination|combination play/)) {
+    priority.push({ t: "▶ Panda Bros — Passing", u: "https://youtu.be/3Lwku21Seb8?si=zPiVoTFZyv-X2Muo", channel: "Panda Bros" });
   }
-  // First touch → Soluna first
-  if (name.match(/first.touch|touch|receive|receiving/)) {
-    links.push({ t: "▶ Soluna — First Touch", u: "https://youtu.be/Mt17vBzxPwI?si=Sgg_bQbDjcU4MbSj" });
+  if (name.match(/first.touch|touch|receive|receiving|control/)) {
+    priority.push({ t: "▶ Soluna — First Touch", u: "https://youtu.be/Mt17vBzxPwI?si=Sgg_bQbDjcU4MbSj", channel: "Soluna Football" });
   }
-  // Finishing → Soluna first
-  if (name.match(/finish|goal|shoot|scoring/)) {
-    links.push({ t: "▶ Soluna — Finishing", u: "https://youtu.be/rbRaC-_M4YQ?si=NRrFD9W6QRQjeg3UmK5r" });
+  if (name.match(/finish|goal|shoot|scoring|strike/)) {
+    priority.push({ t: "▶ Soluna — Finishing", u: "https://youtu.be/rbRaC-_M4YQ?si=NRrFD9W6QRQjeg3UmK5r", channel: "Soluna Football" });
   }
-  return links;
+  return priority;
 }
 const VIDEO_LIBRARY = [
   {
@@ -460,10 +457,10 @@ function PlanView({ plan, philName, diagrams, make, onVariety, varietyLoading })
                 {getPriorityVideos(b.name, b.yt || "").map((v) => (
                   <Chip key={v.u} href={v.u} color={C.gold} textColor={C.gold}>{v.t}</Chip>
                 ))}
-                {b.yt && <Chip href={ytLink(b.yt)}>▶ और वीडियो खोजो</Chip>}
+                <Chip href={ytLink(b.yt || b.name + " football drill youth")}>▶ और वीडियो खोजो</Chip>
                 {onVariety && (
                   <Chip onClick={() => onVariety(i)} color={C.gold} textColor={C.gold}>
-                    {varietyLoading === i ? "नया रूप बन रहा…" : "🔄 वही concept — नया रूप"}
+                    {varietyLoading === i ? "नया रूप बन रहा…" : "🔄 नया रूप"}
                   </Chip>
                 )}
               </div>
@@ -538,7 +535,7 @@ function SessionPlanner({ coach, prefill, clearPrefill }) {
     try {
       let avoid = [];
       try { avoid = (await db("recent_drills")).drills || []; } catch (e) {}
-      const sys = curriculumSys + `\n\nActive lens: ${philObj.lens}\n\nThe technical director's thinking (build strictly from this):\n${thinking}\n${avoid.length ? `\nDrills this coach used recently — do NOT repeat, give fresh forms of the same concepts: ${avoid.join("; ")}` : ""}\n\nRespond ONLY with JSON, no fences:\n{"current":"current competency Hindi","target":"target competency Hindi","why_session":"WHY this session exists on the pathway, one line Hindi","title":"short Hindi title","theme":"one-line kaizen theme Hindi","blocks":[{"name":"Hindi name","minutes":N,"drill":"setup + what players do, 2-3 short Hindi sentences","cue":"one spoken cue Hindi","why":"one line, lens voice, Hindi","yt":"english youtube query"}],"equipment":"Hindi minimal list","closing":"closing circle line Hindi"}\nExactly 4 blocks: warm-up, two main, closing game/circle. Minutes total ${duration}. Every block must serve the target competency. Respect the stage's do-NOT-teach list absolutely.`;
+      const sys = curriculumSys + `\n\nActive lens: ${philObj.lens}\n\nThe technical director's thinking (build strictly from this):\n${thinking}\n${avoid.length ? `\nDrills this coach used recently — do NOT repeat, give fresh forms of the same concepts: ${avoid.join("; ")}` : ""}\n\nCRITICAL RULE: Each block = ONE drill only. Never combine multiple drills into one block. Never write "Drill 1:", "Drill 2:" inside a single block. If you want 3 drills, make 3 separate blocks.\n\nRespond ONLY with JSON, no fences:\n{"current":"current competency Hindi","target":"target competency Hindi","why_session":"WHY this session exists on the pathway, one line Hindi","title":"short Hindi title","theme":"one-line kaizen theme Hindi","blocks":[{"name":"ONE drill name in Hindi — no numbering","minutes":N,"drill":"ONE drill only — setup + what players do, 2-3 short Hindi sentences. No sub-drills. No lists.","cue":"one spoken cue Hindi","why":"one line, lens voice, Hindi","yt":"english youtube search query for THIS specific drill"}],"equipment":"Hindi minimal list","closing":"closing circle line Hindi"}\nGenerate exactly 4 separate blocks. Block 1: warm-up drill. Block 2: main drill. Block 3: main drill variation or progression. Block 4: closing small game or circle. Each block has ONE drill. Total minutes = ${duration}. Every block serves the target competency. Respect stage do-NOT-teach list absolutely.`;
       const raw = await callClaude([{ role: "user", content: ctxLine }], sys, 2200);
       const p = parseJSON(raw);
       setPlan(p); setStage("plan");
