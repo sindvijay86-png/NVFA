@@ -217,7 +217,24 @@ const PATHWAY = [
   },
 ];
 
-// ============ VIDEO LIBRARY (Priority Channels) ============
+// ============ PRIORITY VIDEO MATCHER ============
+function getPriorityVideos(drillName, ytQuery) {
+  const name = (drillName + " " + ytQuery).toLowerCase();
+  const links = [];
+  // Passing → Panda Bros first
+  if (name.match(/pass|rondo|gate/)) {
+    links.push({ t: "▶ Panda Bros — Passing", u: "https://youtu.be/3Lwku21Seb8?si=zPiVoTFZyv-X2Muo" });
+  }
+  // First touch → Soluna first
+  if (name.match(/first.touch|touch|receive|receiving/)) {
+    links.push({ t: "▶ Soluna — First Touch", u: "https://youtu.be/Mt17vBzxPwI?si=Sgg_bQbDjcU4MbSj" });
+  }
+  // Finishing → Soluna first
+  if (name.match(/finish|goal|shoot|scoring/)) {
+    links.push({ t: "▶ Soluna — Finishing", u: "https://youtu.be/rbRaC-_M4YQ?si=NRrFD9W6QRQjeg3UmK5r" });
+  }
+  return links;
+}
 const VIDEO_LIBRARY = [
   {
     channel: "Panda Bros Football",
@@ -440,7 +457,10 @@ function PlanView({ plan, philName, diagrams, make, onVariety, varietyLoading })
               {b.why && <div style={{ fontSize: 13, color: C.grassLight, marginTop: 3 }}>💭 {b.why}</div>}
               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
                 <DiagramBlock k={i} text={`${b.name}. ${b.drill}`} diagrams={diagrams} make={make} />
-                {b.yt && <Chip href={ytLink(b.yt)}>▶ वीडियो खोजो</Chip>}
+                {getPriorityVideos(b.name, b.yt || "").map((v) => (
+                  <Chip key={v.u} href={v.u} color={C.gold} textColor={C.gold}>{v.t}</Chip>
+                ))}
+                {b.yt && <Chip href={ytLink(b.yt)}>▶ और वीडियो खोजो</Chip>}
                 {onVariety && (
                   <Chip onClick={() => onVariety(i)} color={C.gold} textColor={C.gold}>
                     {varietyLoading === i ? "नया रूप बन रहा…" : "🔄 वही concept — नया रूप"}
@@ -808,7 +828,12 @@ function Sahayak({ coach }) {
                 {extras[i] && extras[i] !== "loading" && extras[i] !== "error" && (
                   <>
                     <PitchDiagram spec={extras[i]} />
-                    {extras[i].yt && <div style={{ marginTop: 8 }}><Chip href={ytLink(extras[i].yt)}>▶ सबसे क़रीबी वीडियो खोजो</Chip></div>}
+                    <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                      {getPriorityVideos(m.content, extras[i].yt || "").map((v) => (
+                        <Chip key={v.u} href={v.u} color={C.gold} textColor={C.gold}>{v.t}</Chip>
+                      ))}
+                      {extras[i].yt && <Chip href={ytLink(extras[i].yt)}>▶ और वीडियो खोजो</Chip>}
+                    </div>
                   </>
                 )}
                 {!extras[i] && <div style={{ marginTop: 6 }}><Chip onClick={() => enrich(i, m.content)} textColor={C.chalkDim}>📐 डायग्राम + वीडियो</Chip></div>}
