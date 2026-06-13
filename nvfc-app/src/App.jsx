@@ -99,7 +99,6 @@ Greeting: always greet with "जय सेवा" (e.g., "Hello Coach! जय �
 
 Language: simple Hindi (Devanagari), football terms in English where natural. Short, spoken-style, like a coach on the ground.`;
 
-// ============ MASTER CURRICULUM (the operating system) ============
 const MASTER_CURRICULUM = `NVFC MASTER CURRICULUM — YOU ARE NOT A SESSION PLANNER. You are the technical director of NVFC. Your first responsibility is to protect the long-term development pathway of every child. NEVER generate a session without first identifying: 1) Age stage 2) Development stage 3) Current competency 4) Target competency. Every session must move the player one step along the pathway.
 
 THE PATHWAY:
@@ -141,8 +140,14 @@ const PATHWAY = [
     comps: [
       { hi: "बॉल मास्टरी+", desc: "रोज़ के टच — अब रफ़्तार और दिशा बदलते हुए।", v: [
         { t: "▶ 30 ball mastery drills", u: "https://www.youtube.com/watch?v=IeMYh7roBjk" } ] },
-      { hi: "फर्स्ट टच", desc: "पहला टच अगले काम की तैयारी — दिशा में लो।", v: [sq("first touch drills U10 soccer")] },
-      { hi: "पासिंग-रिसीविंग", desc: "ज़मीन पर, अंदर के पंजे से, साथी के सही पैर पर।", v: [sq("passing receiving drills U10 football")] },
+      { hi: "फर्स्ट टच", desc: "पहला टच अगले काम की तैयारी — दिशा में लो।", v: [
+        { t: "▶ First Touch Drills — Soluna Football", u: "https://youtu.be/Mt17vBzxPwI?si=Sgg_bQbDjcU4MbSj" },
+        { t: "▶ Soluna Football Channel", u: "https://youtube.com/@soluna-football?si=Kyyz_wEgsnElsw04" },
+        sq("first touch drills U10 soccer")] },
+      { hi: "पासिंग-रिसीविंग", desc: "ज़मीन पर, अंदर के पंजे से, साथी के सही पैर पर।", v: [
+        { t: "▶ Passing Drills — Panda Bros", u: "https://youtu.be/3Lwku21Seb8?si=zPiVoTFZyv-X2Muo" },
+        { t: "▶ Panda Bros Football Channel", u: "https://youtube.com/@pandabros.1818?si=L7BxpM5De2vqiW_U" },
+        sq("passing receiving drills U10 football")] },
       { hi: "1v1 हुनर", desc: "एक move पक्का करो — feint, बदलाव, भागो।", v: [sq("Coerver 1v1 moves youth football")] },
       { hi: "Simple Rondo + त्रिकोण", desc: "4v1 गोला — width, support, triangle की पहली झलक।", v: [sq("simple rondo 4v1 U10")] },
       { hi: "GK: हाथ-पैर-बाँटना", desc: "Handling, footwork, distribution — GK की नींव।", v: [
@@ -177,6 +182,9 @@ const PATHWAY = [
       { hi: "Positions + Team Shape", desc: "मैदान के हिस्से, compactness, defensive shape।", v: [sq("teaching team shape U14 football session")] },
       { hi: "Build-up", desc: "पीछे से खेल बनाना — GK से midfield तक।", v: [sq("build up play drills U14 soccer")] },
       { hi: "Passing Lanes + Overloads", desc: "जगह occupy करो, lane खोलो, free player ढूँढो।", v: [sq("overloads passing lanes positional play youth")] },
+      { hi: "फिनिशिंग", desc: "गोल के सामने — शांत रहो, सही कोने में मारो।", v: [
+        { t: "▶ Finishing Drills", u: "https://youtu.be/rbRaC-_M4YQ?si=NRrFD9W6QRQjeg3UmK5r" },
+        sq("finishing drills youth football session")] },
       { hi: "Unit Pressing", desc: "आगे वाले साथ press, midfield साथ shift।", v: [sq("pressing in units youth football session")] },
       { hi: "GK: Crosses + Sweeper", desc: "ऊँची बॉल पकड़ना, लाइन से बाहर खेलना, attack शुरू करना।", v: [sq("goalkeeper crosses high balls drill youth")] },
     ],
@@ -206,6 +214,29 @@ const PATHWAY = [
       { hi: "Leadership + Mentoring", desc: "training चलाओ, छोटों को सिखाओ।", v: [sq("youth captain leadership football")] },
       { hi: "GK: Match Management", desc: "टीम organize करो — मैदान का general।", v: [sq("goalkeeper organizing defense communication")] },
     ],
+  },
+];
+
+// ============ VIDEO LIBRARY (Priority Channels) ============
+const VIDEO_LIBRARY = [
+  {
+    channel: "Panda Bros Football",
+    handle: "@pandabros.1818",
+    url: "https://youtube.com/@pandabros.1818?si=L7BxpM5De2vqiW_U",
+    focus: "Passing Drills",
+    videos: [
+      { t: "Passing Drills", u: "https://youtu.be/3Lwku21Seb8?si=zPiVoTFZyv-X2Muo" },
+    ]
+  },
+  {
+    channel: "Soluna Football",
+    handle: "@soluna-football",
+    url: "https://youtube.com/@soluna-football?si=Kyyz_wEgsnElsw04",
+    focus: "First Touch & Finishing",
+    videos: [
+      { t: "First Touch Drills", u: "https://youtu.be/Mt17vBzxPwI?si=Sgg_bQbDjcU4MbSj" },
+      { t: "Finishing Drills", u: "https://youtu.be/rbRaC-_M4YQ?si=NRrFD9W6QRQjeg3UmK5r" },
+    ]
   },
 ];
 
@@ -251,7 +282,6 @@ const GK_STAGES = [
     videos: [{ t: "5 GK drills for kids — game-based", u: "https://www.youtube.com/watch?v=kEKFYtyDduI" }] },
 ];
 
-// (ytLink defined above with PATHWAY)
 const Card = ({ children, style }) => (
   <div className="fade-up" style={{ position: "relative", background: C.pitchDeep, border: `1px solid ${C.line}`, borderRadius: 14, padding: 16, marginBottom: 12, ...style }}>{children}</div>
 );
@@ -385,7 +415,7 @@ function Login({ onIn }) {
   );
 }
 
-// ============ PLAN VIEW (shared by planner + saved plans) ============
+// ============ PLAN VIEW ============
 function PlanView({ plan, philName, diagrams, make, onVariety, varietyLoading }) {
   return (
     <Card style={{ borderColor: C.grass }}>
@@ -406,7 +436,7 @@ function PlanView({ plan, philName, diagrams, make, onVariety, varietyLoading })
             <div className="body" style={{ flex: 1 }}>
               <div style={{ fontSize: 16, fontWeight: 800, color: C.chalk }}>{b.name}</div>
               <div style={{ fontSize: 14, color: C.chalkDim, marginTop: 3, lineHeight: 1.55 }}>{b.drill}</div>
-              <div style={{ fontSize: 13, color: C.gold, marginTop: 5 }}>🗣 “{b.cue}”</div>
+              <div style={{ fontSize: 13, color: C.gold, marginTop: 5 }}>🗣 "{b.cue}"</div>
               {b.why && <div style={{ fontSize: 13, color: C.grassLight, marginTop: 3 }}>💭 {b.why}</div>}
               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
                 <DiagramBlock k={i} text={`${b.name}. ${b.drill}`} diagrams={diagrams} make={make} />
@@ -425,7 +455,6 @@ function PlanView({ plan, philName, diagrams, make, onVariety, varietyLoading })
         <b style={{ color: C.chalk }}>सामान:</b> {plan.equipment}
       </div>
       <div className="body" style={{ fontSize: 14, color: C.chalk, marginTop: 10, fontStyle: "italic", textAlign: "center" }}>⭕ {plan.closing}</div>
-
       {plan.motivation && (
         <div style={{ marginTop: 16, border: `1px solid ${C.gold}`, borderRadius: 12, padding: 14 }}>
           <div className="display" style={{ fontSize: 16, color: C.gold }}>हौसला — कोच की बात 🔥</div>
@@ -442,7 +471,7 @@ function PlanView({ plan, philName, diagrams, make, onVariety, varietyLoading })
   );
 }
 
-// ============ SESSION PLANNER (curriculum-driven) ============
+// ============ SESSION PLANNER ============
 function SessionPlanner({ coach, prefill, clearPrefill }) {
   const [stageId, setStageId] = useState(prefill?.stageId || "s2");
   const [current, setCurrent] = useState(prefill?.comp || PATHWAY[1].comps[0].hi);
@@ -463,23 +492,15 @@ function SessionPlanner({ coach, prefill, clearPrefill }) {
   const philObj = PHILOSOPHIES.find((p) => p.id === phil);
 
   useEffect(() => {
-    if (prefill) {
-      setStageId(prefill.stageId);
-      setCurrent(prefill.comp);
-      setTarget("");
-      setStage("form"); setPlan(null); setThinking("");
-      clearPrefill && clearPrefill();
-    }
+    if (prefill) { setStageId(prefill.stageId); setCurrent(prefill.comp); setTarget(""); setStage("form"); setPlan(null); setThinking(""); clearPrefill && clearPrefill(); }
   }, [prefill]);
 
   useEffect(() => {
-    // keep competency selections valid when stage changes
     if (!pathStage.comps.find((c) => c.hi === current)) setCurrent(pathStage.comps[0].hi);
   }, [stageId]);
 
   const targetOptions = ["(अगला कदम — खुद चुनो AI)", ...pathStage.comps.map((c) => c.hi)];
   const ctxLine = `Age stage: ${pathStage.age} (${pathStage.en}). Current competency: ${current}. Target competency: ${target || "next logical step on the pathway — you choose"}. Duration: ${duration} min. Ground: ${ground}. Lens: ${philObj.en}. Coach: ${coach.name}.`;
-
   const curriculumSys = BASE_CONTEXT + "\n\n" + MASTER_CURRICULUM + `\n\nHARD GUARDRAILS for stage ${pathStage.age}: ${pathStage.avoid}. Character focus: ${pathStage.character}.`;
 
   const generateThinking = async () => {
@@ -544,7 +565,6 @@ function SessionPlanner({ coach, prefill, clearPrefill }) {
     <div style={{ padding: 20 }}>
       <div className="display" style={{ fontSize: 26, color: C.chalk }}>सेशन प्लानर</div>
       <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>उम्र → पड़ाव → competency → सोच → सेशन। हर सेशन पाथवे पर एक कदम।</div>
-
       {stage === "form" && (
         <Card>
           <Field label="उम्र / पड़ाव">
@@ -567,8 +587,7 @@ function SessionPlanner({ coach, prefill, clearPrefill }) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {PHILOSOPHIES.map((p) => (
                 <button key={p.id} onClick={() => setPhil(p.id)} className="body" style={{
-                  background: phil === p.id ? C.laterite : C.pitch,
-                  border: `1.5px solid ${phil === p.id ? C.laterite : C.line}`,
+                  background: phil === p.id ? C.laterite : C.pitch, border: `1.5px solid ${phil === p.id ? C.laterite : C.line}`,
                   borderRadius: 10, padding: "10px 8px", cursor: "pointer", textAlign: "left",
                 }}>
                   <div style={{ fontSize: 15, fontWeight: 800, color: C.chalk }}>{p.hi}</div>
@@ -595,7 +614,6 @@ function SessionPlanner({ coach, prefill, clearPrefill }) {
           {err && <div className="body" style={{ color: C.laterite, fontSize: 13, marginTop: 10 }}>{err}</div>}
         </Card>
       )}
-
       {stage === "thinking" && (
         <div>
           <Card style={{ borderColor: C.gold }}>
@@ -613,7 +631,6 @@ function SessionPlanner({ coach, prefill, clearPrefill }) {
           {err && <div className="body" style={{ color: C.laterite, fontSize: 13, marginTop: 10 }}>{err}</div>}
         </div>
       )}
-
       {stage === "plan" && plan && (
         <div>
           <PlanView plan={plan} philName={philObj.hi} diagrams={diagrams} make={makeDiagram} onVariety={variety} varietyLoading={varietyLoading} />
@@ -633,7 +650,6 @@ function MyPlans() {
   const [open, setOpen] = useState(null);
   const [diagrams, makeDiagram] = useDiagrams();
   useEffect(() => { db("list_plans").then((r) => setPlans(r.plans)).catch(() => setPlans([])); }, []);
-
   if (open) {
     const p = open.payload;
     const philName = (PHILOSOPHIES.find((x) => x.id === p.phil) || {}).hi;
@@ -651,13 +667,12 @@ function MyPlans() {
       </div>
     );
   }
-
   return (
     <div style={{ padding: 20 }}>
       <div className="display" style={{ fontSize: 26, color: C.chalk }}>मेरे प्लान</div>
       <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>हर save किया हुआ सेशन — दोबारा खोलो, दोबारा खेलो।</div>
       {plans === null && <div className="body" style={{ color: C.chalkDim }}>लोड हो रहा है…</div>}
-      {plans && plans.length === 0 && <Card><div className="body" style={{ color: C.chalkDim, fontSize: 14 }}>अभी कोई plan save नहीं है। सेशन tab से पहला plan बनाओ और save करो।</div></Card>}
+      {plans && plans.length === 0 && <Card><div className="body" style={{ color: C.chalkDim, fontSize: 14 }}>अभी कोई plan save नहीं है।</div></Card>}
       {plans && plans.map((p) => (
         <button key={p.id} onClick={() => setOpen(p)} className="body fade-up" style={{
           display: "block", width: "100%", textAlign: "left", background: C.pitchDeep,
@@ -688,7 +703,6 @@ function Reports({ coach }) {
   const [msg, setMsg] = useState("");
   const load = () => db("list_reports").then((r) => setReports(r.reports)).catch(() => setReports([]));
   useEffect(load, []);
-
   const save = async () => {
     setSaving(true); setMsg("");
     try {
@@ -699,50 +713,33 @@ function Reports({ coach }) {
     } catch (e) { setMsg("जमा नहीं हुई — फिर कोशिश करो।"); }
     setSaving(false);
   };
-
   const byMonth = {};
   (reports || []).forEach((r) => {
     const m = new Date(r.week_start).toLocaleDateString("hi-IN", { month: "long", year: "numeric" });
     (byMonth[m] = byMonth[m] || []).push(r);
   });
-
   return (
     <div style={{ padding: 20 }}>
       <div className="display" style={{ fontSize: 26, color: C.chalk }}>साप्ताहिक रिपोर्ट</div>
       <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>हर हफ़्ते 2 मिनट — पूरे प्रोग्राम की आँखें यही हैं।</div>
       <Card>
-        <Field label="हफ़्ता (सोमवार)">
-          <input type="date" value={form.week_start} onChange={(e) => setForm({ ...form, week_start: e.target.value })} style={inputStyle} />
-        </Field>
+        <Field label="हफ़्ता (सोमवार)"><input type="date" value={form.week_start} onChange={(e) => setForm({ ...form, week_start: e.target.value })} style={inputStyle} /></Field>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <Field label="कितने सेशन हुए?">
-            <input type="number" inputMode="numeric" value={form.sessions} onChange={(e) => setForm({ ...form, sessions: e.target.value })} style={inputStyle} placeholder="3" />
-          </Field>
-          <Field label="औसत हाज़िरी">
-            <input type="number" inputMode="numeric" value={form.avg_attendance} onChange={(e) => setForm({ ...form, avg_attendance: e.target.value })} style={inputStyle} placeholder="18" />
-          </Field>
+          <Field label="कितने सेशन हुए?"><input type="number" inputMode="numeric" value={form.sessions} onChange={(e) => setForm({ ...form, sessions: e.target.value })} style={inputStyle} placeholder="3" /></Field>
+          <Field label="औसत हाज़िरी"><input type="number" inputMode="numeric" value={form.avg_attendance} onChange={(e) => setForm({ ...form, avg_attendance: e.target.value })} style={inputStyle} placeholder="18" /></Field>
         </div>
-        <Field label="क्या अच्छा हुआ?">
-          <textarea rows={2} value={form.went_well} onChange={(e) => setForm({ ...form, went_well: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="बच्चों ने पहली बार खुद rondo शुरू किया…" />
-        </Field>
-        <Field label="क्या मुश्किल रही?">
-          <textarea rows={2} value={form.challenge} onChange={(e) => setForm({ ...form, challenge: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="बारिश से मैदान गीला, दो बॉल पंक्चर…" />
-        </Field>
-        <Field label="इस हफ़्ते का कैज़ेन moment (एक बच्चे की छोटी जीत)">
-          <textarea rows={2} value={form.kaizen_moment} onChange={(e) => setForm({ ...form, kaizen_moment: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="गुड़िया ने पहली बार weak foot से pass दिया…" />
-        </Field>
+        <Field label="क्या अच्छा हुआ?"><textarea rows={2} value={form.went_well} onChange={(e) => setForm({ ...form, went_well: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="बच्चों ने पहली बार खुद rondo शुरू किया…" /></Field>
+        <Field label="क्या मुश्किल रही?"><textarea rows={2} value={form.challenge} onChange={(e) => setForm({ ...form, challenge: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="बारिश से मैदान गीला, दो बॉल पंक्चर…" /></Field>
+        <Field label="इस हफ़्ते का कैज़ेन moment"><textarea rows={2} value={form.kaizen_moment} onChange={(e) => setForm({ ...form, kaizen_moment: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="गुड़िया ने पहली बार weak foot से pass दिया…" /></Field>
         <Btn primary onClick={save} disabled={saving}>{saving ? "जमा हो रही…" : "रिपोर्ट जमा करो"}</Btn>
         {msg && <div className="body" style={{ color: msg.startsWith("✓") ? C.grassLight : C.laterite, fontSize: 13, marginTop: 10 }}>{msg}</div>}
       </Card>
-
       {Object.entries(byMonth).map(([month, rows]) => (
         <div key={month}>
           <div className="display" style={{ fontSize: 16, color: C.gold, margin: "16px 0 8px" }}>{month}</div>
           {rows.map((r) => (
             <Card key={r.id}>
-              <div className="body" style={{ fontSize: 13, color: C.chalkDim }}>
-                हफ़्ता {new Date(r.week_start).toLocaleDateString("hi-IN", { day: "numeric", month: "short" })} • {r.sessions} सेशन • ~{r.avg_attendance} बच्चे
-              </div>
+              <div className="body" style={{ fontSize: 13, color: C.chalkDim }}>हफ़्ता {new Date(r.week_start).toLocaleDateString("hi-IN", { day: "numeric", month: "short" })} • {r.sessions} सेशन • ~{r.avg_attendance} बच्चे</div>
               {r.went_well && <div className="body" style={{ fontSize: 14, color: C.chalk, marginTop: 6 }}>✅ {r.went_well}</div>}
               {r.challenge && <div className="body" style={{ fontSize: 14, color: C.chalkDim, marginTop: 4 }}>⚠️ {r.challenge}</div>}
               {r.kaizen_moment && <div className="body" style={{ fontSize: 14, color: C.grassLight, marginTop: 4 }}>改善 {r.kaizen_moment}</div>}
@@ -803,8 +800,7 @@ function Sahayak({ coach }) {
                 maxWidth: "85%", padding: "10px 14px", borderRadius: 14, fontSize: 15, lineHeight: 1.5, whiteSpace: "pre-wrap",
                 background: m.role === "user" ? C.laterite : C.pitchDeep, color: C.chalk,
                 border: m.role === "user" ? "none" : `1px solid ${C.line}`,
-                borderBottomRightRadius: m.role === "user" ? 4 : 14,
-                borderBottomLeftRadius: m.role === "user" ? 14 : 4,
+                borderBottomRightRadius: m.role === "user" ? 4 : 14, borderBottomLeftRadius: m.role === "user" ? 14 : 4,
               }}>{m.content}</div>
             </div>
             {m.role === "assistant" && i > 0 && (
@@ -841,15 +837,16 @@ function Sahayak({ coach }) {
   );
 }
 
-// ============ LIBRARY (Drills + GK) ============
+// ============ LIBRARY (Drills + GK + Videos) ============
 function Library() {
   const [sub, setSub] = useState("drills");
   const [diagrams, makeDiagram] = useDiagrams();
   return (
     <div style={{ padding: 20 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         <Chip onClick={() => setSub("drills")} color={sub === "drills" ? C.laterite : C.line} textColor={sub === "drills" ? C.laterite : C.chalkDim}>⚽ ड्रिल</Chip>
         <Chip onClick={() => setSub("gk")} color={sub === "gk" ? C.laterite : C.line} textColor={sub === "gk" ? C.laterite : C.chalkDim}>🧤 गोलची</Chip>
+        <Chip onClick={() => setSub("videos")} color={sub === "videos" ? C.laterite : C.line} textColor={sub === "videos" ? C.laterite : C.chalkDim}>▶ वीडियो</Chip>
       </div>
 
       {sub === "drills" && (
@@ -866,7 +863,7 @@ function Library() {
                 <Tag>{d.age}</Tag>
               </div>
               <div className="body" style={{ fontSize: 14, color: C.chalkDim, marginTop: 8, lineHeight: 1.5 }}>{d.desc}</div>
-              <div className="body" style={{ fontSize: 13, color: C.gold, marginTop: 8 }}>🗣 “{d.cue}”</div>
+              <div className="body" style={{ fontSize: 13, color: C.gold, marginTop: 8 }}>🗣 "{d.cue}"</div>
               <div className="body" style={{ fontSize: 13, color: C.grassLight, marginTop: 4, fontWeight: 700 }}>改善 कैज़ेन: {d.kaizen}</div>
               <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                 <DiagramBlock k={"d" + i} text={`${d.hi}. ${d.desc}`} diagrams={diagrams} make={makeDiagram} />
@@ -880,10 +877,7 @@ function Library() {
       {sub === "gk" && (
         <>
           <div className="display" style={{ fontSize: 26, color: C.chalk }}>गोलची 🧤</div>
-          <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 8 }}>कोएर्वर pyramid — goalkeeping पर। पहले बॉल से दोस्ती, फिर हुनर, फिर खेल।</div>
-          <div className="body" style={{ fontSize: 12, color: C.gold, marginBottom: 16, border: `1px dashed ${C.line}`, borderRadius: 10, padding: "8px 12px" }}>
-            ईमानदार बात: Coerver की कोई official GK किताब नहीं — यहाँ उनकी सीढ़ी-दर-सीढ़ी सोच को goalkeeping पर लगाया गया है। videos असली और जाँचे हुए हैं।
-          </div>
+          <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 8 }}>कोएर्वर pyramid — goalkeeping पर।</div>
           {GK_STAGES.map((s, i) => (
             <Card key={i}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -894,7 +888,7 @@ function Library() {
                 <Tag>{s.coerver}</Tag>
               </div>
               <div className="body" style={{ fontSize: 14, color: C.chalkDim, marginTop: 8, lineHeight: 1.55 }}>{s.drill}</div>
-              <div className="body" style={{ fontSize: 13, color: C.gold, marginTop: 8 }}>🗣 “{s.cue}”</div>
+              <div className="body" style={{ fontSize: 13, color: C.gold, marginTop: 8 }}>🗣 "{s.cue}"</div>
               <div className="body" style={{ fontSize: 13, color: C.grassLight, marginTop: 4, fontWeight: 700 }}>改善 कैज़ेन: {s.kaizen}</div>
               <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                 <DiagramBlock k={"g" + i} text={`GK: ${s.hi}. ${s.drill}`} diagrams={diagrams} make={makeDiagram} />
@@ -902,6 +896,40 @@ function Library() {
               </div>
             </Card>
           ))}
+        </>
+      )}
+
+      {sub === "videos" && (
+        <>
+          <div className="display" style={{ fontSize: 26, color: C.chalk }}>वीडियो लाइब्रेरी ▶</div>
+          <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>NVFC के priority channels — सबसे पहले यहाँ देखो।</div>
+          {VIDEO_LIBRARY.map((ch, ci) => (
+            <Card key={ci} style={{ borderColor: C.gold }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div>
+                  <div className="display" style={{ fontSize: 18, color: C.chalk }}>{ch.channel}</div>
+                  <div className="body" style={{ fontSize: 12, color: C.chalkDim }}>{ch.handle} • {ch.focus}</div>
+                </div>
+                <Chip href={ch.url} color={C.gold} textColor={C.gold}>Channel →</Chip>
+              </div>
+              {ch.videos.map((v, vi) => (
+                <a key={vi} href={v.u} target="_blank" rel="noopener noreferrer" style={{
+                  display: "flex", alignItems: "center", gap: 12, padding: "10px 12px",
+                  background: C.pitch, borderRadius: 10, marginBottom: 8, textDecoration: "none",
+                  border: `1px solid ${C.line}`,
+                }}>
+                  <div style={{ width: 40, height: 40, background: "#ff0000", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>▶</div>
+                  <div>
+                    <div className="body" style={{ fontSize: 14, color: C.chalk, fontWeight: 700 }}>{v.t}</div>
+                    <div className="body" style={{ fontSize: 11, color: C.chalkDim, marginTop: 2 }}>YouTube पर खोलें →</div>
+                  </div>
+                </a>
+              ))}
+            </Card>
+          ))}
+          <div className="body" style={{ fontSize: 12, color: C.chalkDim, textAlign: "center", marginTop: 8 }}>
+            और channels जोड़े जाएंगे — DJ से बताओ
+          </div>
         </>
       )}
     </div>
@@ -915,9 +943,7 @@ function Pathway({ onMakeSession }) {
   return (
     <div style={{ padding: 20 }}>
       <div className="display" style={{ fontSize: 26, color: C.chalk }}>खिलाड़ी पाथवे</div>
-      <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>
-        6 साल से 18 तक — एक सीढ़ी। हर सेशन इस पर एक कदम। फुटबॉल और चरित्र — दोनों बराबर।
-      </div>
+      <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>6 साल से 18 तक — एक सीढ़ी। हर सेशन इस पर एक कदम।</div>
       {PATHWAY.map((s) => (
         <div key={s.id} style={{ marginBottom: 10 }}>
           <button onClick={() => setOpenStage(openStage === s.id ? null : s.id)} className="body fade-up" style={{
@@ -932,12 +958,10 @@ function Pathway({ onMakeSession }) {
             </div>
             <span style={{ color: C.gold, fontSize: 18 }}>{openStage === s.id ? "−" : "+"}</span>
           </button>
-
           {openStage === s.id && (
             <div className="fade-up" style={{ padding: "10px 4px 0" }}>
               <div className="body" style={{ fontSize: 12, color: C.laterite, marginBottom: 6 }}>🚫 अभी नहीं: {s.avoid}</div>
               <div className="body" style={{ fontSize: 12, color: C.gold, marginBottom: 10 }}>🌱 चरित्र: {s.character}</div>
-
               {s.comps.map((c, ci) => (
                 <Card key={c.hi}>
                   <div className="body" style={{ fontSize: 16, fontWeight: 800, color: C.chalk }}>{c.hi}</div>
@@ -949,7 +973,6 @@ function Pathway({ onMakeSession }) {
                   </div>
                 </Card>
               ))}
-
               <div className="body" style={{ fontSize: 12, color: C.grassLight, margin: "4px 0 8px" }}>
                 🎓 Graduation: {s.grad.join(" • ")}
               </div>
@@ -966,10 +989,7 @@ export default function App() {
   const [coach] = useState({ name: "NVFC Coach" });
   const [tab, setTab] = useState("pathway");
   const [prefill, setPrefill] = useState(null);
-
-  
   const makeSession = (stageId, comp) => { setPrefill({ stageId, comp }); setTab("session"); };
-
   const tabs = [
     { id: "pathway", hi: "पाथवे", icon: "🪜" },
     { id: "session", hi: "सेशन", icon: "📋" },
@@ -978,47 +998,41 @@ export default function App() {
     { id: "reports", hi: "रिपोर्ट", icon: "📝" },
     { id: "plans", hi: "प्लान", icon: "📚" },
   ];
-
   return (
     <div className="body" style={{ minHeight: "100vh", background: C.pitch, display: "flex", justifyContent: "center" }}>
       <FontStyles />
       <div style={{ width: "100%", maxWidth: 440, display: "flex", flexDirection: "column", minHeight: "100vh", position: "relative" }}>
-        {true && (
-          <>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px 0" }}>
-              <span className="display" style={{ color: C.chalk, fontSize: 20 }}>NVFC</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Tag color={C.grass}>NVFC Coach</Tag>
-                
-              </div>
-            </div>
-            <div style={{ flex: 1, paddingBottom: 84 }}>
-              {tab === "pathway" && <Pathway onMakeSession={makeSession} />}
-              {tab === "session" && <SessionPlanner coach={coach} prefill={prefill} clearPrefill={() => setPrefill(null)} />}
-              {tab === "sahayak" && <div style={{ height: "calc(100vh - 150px)" }}><Sahayak coach={coach} /></div>}
-              {tab === "library" && <Library />}
-              {tab === "reports" && <Reports coach={coach} />}
-              {tab === "plans" && <MyPlans />}
-            </div>
-            <div style={{
-              position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
-              width: "100%", maxWidth: 440, display: "flex",
-              background: C.pitchDeep, borderTop: `1.5px solid ${C.line}`,
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px 0" }}>
+          <span className="display" style={{ color: C.chalk, fontSize: 20 }}>NVFC</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Tag color={C.grass}>NVFC Coach</Tag>
+          </div>
+        </div>
+        <div style={{ flex: 1, paddingBottom: 84 }}>
+          {tab === "pathway" && <Pathway onMakeSession={makeSession} />}
+          {tab === "session" && <SessionPlanner coach={coach} prefill={prefill} clearPrefill={() => setPrefill(null)} />}
+          {tab === "sahayak" && <div style={{ height: "calc(100vh - 150px)" }}><Sahayak coach={coach} /></div>}
+          {tab === "library" && <Library />}
+          {tab === "reports" && <Reports coach={coach} />}
+          {tab === "plans" && <MyPlans />}
+        </div>
+        <div style={{
+          position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
+          width: "100%", maxWidth: 440, display: "flex",
+          background: C.pitchDeep, borderTop: `1.5px solid ${C.line}`,
+        }}>
+          {tabs.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)} className="body" style={{
+              flex: 1, background: "none", border: "none", padding: "10px 0 14px",
+              cursor: "pointer", color: tab === t.id ? C.gold : C.chalkDim,
+              borderTop: tab === t.id ? `3px solid ${C.laterite}` : "3px solid transparent",
+              fontSize: 12, fontWeight: 700,
             }}>
-              {tabs.map((t) => (
-                <button key={t.id} onClick={() => setTab(t.id)} className="body" style={{
-                  flex: 1, background: "none", border: "none", padding: "10px 0 14px",
-                  cursor: "pointer", color: tab === t.id ? C.gold : C.chalkDim,
-                  borderTop: tab === t.id ? `3px solid ${C.laterite}` : "3px solid transparent",
-                  fontSize: 12, fontWeight: 700,
-                }}>
-                  <div style={{ fontSize: 17 }}>{t.icon}</div>
-                  {t.hi}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
+              <div style={{ fontSize: 17 }}>{t.icon}</div>
+              {t.hi}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
