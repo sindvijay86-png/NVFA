@@ -715,55 +715,87 @@ function mondayOf(d = new Date()) {
 
 function Reports({ coach }) {
   const [form, setForm] = useState({ week_start: mondayOf(), sessions: "", avg_attendance: "", went_well: "", challenge: "", kaizen_moment: "" });
-  const [reports, setReports] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState("");
-  const load = () => db("list_reports").then((r) => setReports(r.reports)).catch(() => setReports([]));
-  useEffect(load, []);
-  const save = async () => {
-    setSaving(true); setMsg("");
-    try {
-      await db("save_report", { ...form, sessions: Number(form.sessions) || 0, avg_attendance: Number(form.avg_attendance) || 0 });
-      setMsg("✓ रिपोर्ट जमा हो गई — शाबाश कोच!");
-      setForm({ week_start: mondayOf(), sessions: "", avg_attendance: "", went_well: "", challenge: "", kaizen_moment: "" });
-      load();
-    } catch (e) { setMsg("जमा नहीं हुई — फिर कोशिश करो।"); }
-    setSaving(false);
+  const [report, setReport] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const generate = () => {
+    const dateStr = new Date(form.week_start).toLocaleDateString("hi-IN", { day: "numeric", month: "long", year: "numeric" });
+    const text = `📋 NVFC साप्ताहिक रिपोर्ट
+━━━━━━━━━━━━━━━━━━━━
+कोच: ${coach.name}
+हफ़्ता: ${dateStr}
+सेशन: ${form.sessions || "—"} | औसत हाज़िरी: ${form.avg_attendance || "—"} बच्चे
+
+✅ क्या अच्छा हुआ:
+${form.went_well || "—"}
+
+⚠️ क्या मुश्किल रही:
+${form.challenge || "—"}
+
+改善 कैज़ेन moment:
+${form.kaizen_moment || "—"}
+━━━━━━━━━━━━━━━━━━━━
+NVFC — Narmada Valley Football Club
+जय सेवा 🙏`;
+    setReport(text);
+    setCopied(false);
   };
-  const byMonth = {};
-  (reports || []).forEach((r) => {
-    const m = new Date(r.week_start).toLocaleDateString("hi-IN", { month: "long", year: "numeric" });
-    (byMonth[m] = byMonth[m] || []).push(r);
-  });
+
+  const copy = () => {
+    const el = document.createElement("textarea");
+    el.value = report;
+    el.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(el);
+    el.focus(); el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const reset = () => { setReport(null); setCopied(false); setForm({ week_start: mondayOf(), sessions: "", avg_attendance: "", went_well: "", challenge: "", kaizen_moment: "" }); };
+
   return (
     <div style={{ padding: 20 }}>
       <div className="display" style={{ fontSize: 26, color: C.chalk }}>साप्ताहिक रिपोर्ट</div>
-      <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>हर हफ़्ते 2 मिनट — पूरे प्रोग्राम की आँखें यही हैं।</div>
-      <Card>
-        <Field label="हफ़्ता (सोमवार)"><input type="date" value={form.week_start} onChange={(e) => setForm({ ...form, week_start: e.target.value })} style={inputStyle} /></Field>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <Field label="कितने सेशन हुए?"><input type="number" inputMode="numeric" value={form.sessions} onChange={(e) => setForm({ ...form, sessions: e.target.value })} style={inputStyle} placeholder="3" /></Field>
-          <Field label="औसत हाज़िरी"><input type="number" inputMode="numeric" value={form.avg_attendance} onChange={(e) => setForm({ ...form, avg_attendance: e.target.value })} style={inputStyle} placeholder="18" /></Field>
+      <div className="body" style={{ fontSize: 13, color: C.chalkDim, marginBottom: 16 }}>भरो → रिपोर्ट बनाओ → कॉपी करके WhatsApp या डायरी में रखो।</div>
+
+      {!report && (
+        <Card>
+          <Field label="हफ़्ता (सोमवार)">
+            <input type="date" value={form.week_start} onChange={(e) => setForm({ ...form, week_start: e.target.value })} style={inputStyle} />
+          </Field>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <Field label="कितने सेशन हुए?">
+              <input type="number" inputMode="numeric" value={form.sessions} onChange={(e) => setForm({ ...form, sessions: e.target.value })} style={inputStyle} placeholder="3" />
+            </Field>
+            <Field label="औसत हाज़िरी">
+              <input type="number" inputMode="numeric" value={form.avg_attendance} onChange={(e) => setForm({ ...form, avg_attendance: e.target.value })} style={inputStyle} placeholder="18" />
+            </Field>
+          </div>
+          <Field label="क्या अच्छा हुआ?">
+            <textarea rows={2} value={form.went_well} onChange={(e) => setForm({ ...form, went_well: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="बच्चों ने पहली बार खुद rondo शुरू किया…" />
+          </Field>
+          <Field label="क्या मुश्किल रही?">
+            <textarea rows={2} value={form.challenge} onChange={(e) => setForm({ ...form, challenge: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="बारिश से मैदान गीला, दो बॉल पंक्चर…" />
+          </Field>
+          <Field label="इस हफ़्ते का कैज़ेन moment (एक बच्चे की छोटी जीत)">
+            <textarea rows={2} value={form.kaizen_moment} onChange={(e) => setForm({ ...form, kaizen_moment: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="गुड़िया ने पहली बार weak foot से pass दिया…" />
+          </Field>
+          <Btn primary onClick={generate}>📋 रिपोर्ट बनाओ</Btn>
+        </Card>
+      )}
+
+      {report && (
+        <div>
+          <Card style={{ borderColor: C.gold }}>
+            <div className="body" style={{ fontSize: 14, color: C.chalk, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace" }}>{report}</div>
+          </Card>
+          <Btn primary onClick={copy} style={{ marginBottom: 8 }}>{copied ? "✓ कॉपी हो गई!" : "📋 कॉपी करो — WhatsApp / डायरी"}</Btn>
+          <div style={{ height: 8 }} />
+          <Btn onClick={reset}>← नई रिपोर्ट बनाओ</Btn>
         </div>
-        <Field label="क्या अच्छा हुआ?"><textarea rows={2} value={form.went_well} onChange={(e) => setForm({ ...form, went_well: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="बच्चों ने पहली बार खुद rondo शुरू किया…" /></Field>
-        <Field label="क्या मुश्किल रही?"><textarea rows={2} value={form.challenge} onChange={(e) => setForm({ ...form, challenge: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="बारिश से मैदान गीला, दो बॉल पंक्चर…" /></Field>
-        <Field label="इस हफ़्ते का कैज़ेन moment"><textarea rows={2} value={form.kaizen_moment} onChange={(e) => setForm({ ...form, kaizen_moment: e.target.value })} style={{ ...inputStyle, resize: "none" }} placeholder="गुड़िया ने पहली बार weak foot से pass दिया…" /></Field>
-        <Btn primary onClick={save} disabled={saving}>{saving ? "जमा हो रही…" : "रिपोर्ट जमा करो"}</Btn>
-        {msg && <div className="body" style={{ color: msg.startsWith("✓") ? C.grassLight : C.laterite, fontSize: 13, marginTop: 10 }}>{msg}</div>}
-      </Card>
-      {Object.entries(byMonth).map(([month, rows]) => (
-        <div key={month}>
-          <div className="display" style={{ fontSize: 16, color: C.gold, margin: "16px 0 8px" }}>{month}</div>
-          {rows.map((r) => (
-            <Card key={r.id}>
-              <div className="body" style={{ fontSize: 13, color: C.chalkDim }}>हफ़्ता {new Date(r.week_start).toLocaleDateString("hi-IN", { day: "numeric", month: "short" })} • {r.sessions} सेशन • ~{r.avg_attendance} बच्चे</div>
-              {r.went_well && <div className="body" style={{ fontSize: 14, color: C.chalk, marginTop: 6 }}>✅ {r.went_well}</div>}
-              {r.challenge && <div className="body" style={{ fontSize: 14, color: C.chalkDim, marginTop: 4 }}>⚠️ {r.challenge}</div>}
-              {r.kaizen_moment && <div className="body" style={{ fontSize: 14, color: C.grassLight, marginTop: 4 }}>改善 {r.kaizen_moment}</div>}
-            </Card>
-          ))}
-        </div>
-      ))}
+      )}
     </div>
   );
 }
